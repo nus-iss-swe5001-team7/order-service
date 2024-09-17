@@ -1,7 +1,7 @@
 package com.nus.edu.se.order.mapper;
 
 import com.nus.edu.se.exception.DataNotFoundException;
-import com.nus.edu.se.grouopfoodorder.dto.OrderDetailResponse;
+import com.nus.edu.se.groupfoodorder.dto.OrderDetailResponse;
 import com.nus.edu.se.menu.dao.MenuRepository;
 import com.nus.edu.se.menu.model.Menu;
 import com.nus.edu.se.order.model.Order;

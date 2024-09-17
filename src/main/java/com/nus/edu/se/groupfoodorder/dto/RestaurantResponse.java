@@ -1,4 +1,4 @@
-package com.nus.edu.se.grouopfoodorder.dto;
+package com.nus.edu.se.groupfoodorder.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

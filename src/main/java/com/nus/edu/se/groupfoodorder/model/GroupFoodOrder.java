@@ -1,4 +1,4 @@
-package com.nus.edu.se.grouopfoodorder.model;
+package com.nus.edu.se.groupfoodorder.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;

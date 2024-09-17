@@ -1,20 +1,21 @@
-package com.nus.edu.se.grouopfoodorder.dto;
+package com.nus.edu.se.groupfoodorder.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.util.UUID;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderRequest{
+    private String id;
     private String userId;
     private String groupFoodOrderId;
     private String restaurantId;
     private String location;
     private float deliveryFee;
     private String orderDetails;
+    private String createdTime;
 }

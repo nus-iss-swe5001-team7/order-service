@@ -1,13 +1,13 @@
-package com.nus.edu.se.grouopfoodorder.boundary;
+package com.nus.edu.se.groupfoodorder.boundary;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nus.edu.se.exception.AuthenticationException;
 import com.nus.edu.se.exception.DataNotFoundException;
-import com.nus.edu.se.grouopfoodorder.dao.GroupOrderRepository;
-import com.nus.edu.se.grouopfoodorder.dto.*;
-import com.nus.edu.se.grouopfoodorder.model.GroupFoodOrder;
-import com.nus.edu.se.grouopfoodorder.service.GroupOrdersService;
+import com.nus.edu.se.groupfoodorder.dao.GroupOrderRepository;
+import com.nus.edu.se.groupfoodorder.dto.*;
+import com.nus.edu.se.groupfoodorder.model.GroupFoodOrder;
+import com.nus.edu.se.groupfoodorder.service.GroupOrdersService;
 import com.nus.edu.se.order.dao.OrderDetailRepository;
 import com.nus.edu.se.order.dao.OrderRepository;
 import com.nus.edu.se.order.mapper.OrderDetailMapper;
@@ -49,7 +49,7 @@ public class GroupOrderController {
     private static final String SERVICE_NAME = "CreateGroupFoodOrder";
 
     @PostMapping("/groupFoodOrder")
-//    @CircuitBreaker(name = SERVICE_NAME, fallbackMethod = "fallbackMethod")
+//    @CircuitBreaker(name = SERVICE_NAME, fallbackMethod = "fallbackCreateGroupFoodOrder")
     public ResponseEntity<OrderResponse> createGroupFoodOrder(@RequestBody OrderRequest orderRequest) throws JsonProcessingException {
         GroupFoodOrder groupFoodOrder = new GroupFoodOrder();
         if (orderRequest.getGroupFoodOrderId()!= null) {
@@ -81,13 +81,12 @@ public class GroupOrderController {
         List<OrderDetailResponse> orderDetailArray = saveOrderDetails(orderRequest.getOrderDetails(), order);
 
         return ResponseEntity.ok(orderMapper.fromOrderToOrderDTO(order, orderDetailArray));
-//        return ResponseEntity.ok().build();
     }
 
     public ResponseEntity<OrderResponse> fallbackCreateGroupFoodOrder(OrderRequest orderRequest, Throwable throwable) {
         // Handle the fallback logic here
         // For example, return a default response or an error message
-        OrderResponse fallbackResponse = new OrderResponse(/* set default response fields here */);
+        OrderResponse fallbackResponse = new OrderResponse();
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(fallbackResponse);
     }
 
@@ -114,5 +113,13 @@ public class GroupOrderController {
         }
     }
 
-
+//    @GetMapping("/groupOrders")
+//    public List<?> findAllByUserId(@RequestParam(value = "parameter") String userId) {
+//        UUID userUUID = UUID.fromString(userId);
+//        UsersModel usersModel = new UsersModel();
+//        usersModel.setId(userUUID);
+//        List<GroupFoodOrderResponse> groupOrders = groupOrdersService.getGroupOrderListByUserId(usersModel);
+//
+//        return groupOrders;
+//    }
 }

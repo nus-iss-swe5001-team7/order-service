@@ -1,6 +1,6 @@
-package com.nus.edu.se.grouopfoodorder.dao;
+package com.nus.edu.se.groupfoodorder.dao;
 
-import com.nus.edu.se.grouopfoodorder.model.GroupFoodOrder;
+import com.nus.edu.se.groupfoodorder.model.GroupFoodOrder;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

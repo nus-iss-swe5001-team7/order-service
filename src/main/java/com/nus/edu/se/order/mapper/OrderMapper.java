@@ -2,8 +2,8 @@ package com.nus.edu.se.order.mapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nus.edu.se.grouopfoodorder.dto.OrderDetailResponse;
-import com.nus.edu.se.grouopfoodorder.dto.OrderResponse;
+import com.nus.edu.se.groupfoodorder.dto.OrderDetailResponse;
+import com.nus.edu.se.groupfoodorder.dto.OrderResponse;
 import com.nus.edu.se.order.model.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
