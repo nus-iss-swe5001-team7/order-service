@@ -11,12 +11,11 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderDetailResponse {
-    private UUID id;
+public class OrderDetailDTO {
+
+    private String menuId;
 
     private Integer quantity;
-
-    private UUID menuId;
 
     private String name;
 

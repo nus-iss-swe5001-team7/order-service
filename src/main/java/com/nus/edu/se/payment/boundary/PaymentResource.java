@@ -1,6 +1,7 @@
 
 package com.nus.edu.se.payment.boundary;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.nus.edu.se.exception.AuthenticationException;
 import com.nus.edu.se.exception.DataNotFoundException;
@@ -12,6 +13,7 @@ import com.nus.edu.se.order.dao.OrderRepository;
 import com.nus.edu.se.order.model.Order;
 import com.nus.edu.se.payment.pricing.DecoratorGenerator;
 import com.nus.edu.se.payment.pricing.FoodCart;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-//@CrossOrigin(origins = "*", allowedHeaders = "*", maxAge = 3600)
+@Slf4j
 @RestController
 @RequestMapping("UpdatePaymentStatusAPI")
 public class PaymentResource {
@@ -39,8 +41,8 @@ public class PaymentResource {
     private GroupOrdersService groupOrdersService;
 
     @Transactional
-    @PutMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> updatePaymentStatus(@RequestBody JsonNode paymentDetailsN) {
+    @PutMapping(value = "/updatePayment", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> updatePaymentStatus(@RequestBody JsonNode paymentDetailsN){
 
         /*  examlpe of paymentDetailsN
         paymentDetailsN = {

@@ -1,4 +1,4 @@
-package com.nus.edu.se.groupfoodorder.dto;
+package com.nus.edu.se.restaurant.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RestaurantResponse {
-    private UUID id;
+    private String id;
     private String restaurantName;
     private String cuisineType;
     private String location;

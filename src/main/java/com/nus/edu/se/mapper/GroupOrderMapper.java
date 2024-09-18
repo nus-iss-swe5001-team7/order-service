@@ -1,7 +1,7 @@
 package com.nus.edu.se.mapper;
 
 import com.nus.edu.se.groupfoodorder.dto.GroupFoodOrderResponse;
-import com.nus.edu.se.groupfoodorder.dto.RestaurantResponse;
+import com.nus.edu.se.restaurant.dto.RestaurantResponse;
 import com.nus.edu.se.groupfoodorder.model.GroupFoodOrder;
 import com.nus.edu.se.order.model.Order;
 import org.springframework.stereotype.Component;

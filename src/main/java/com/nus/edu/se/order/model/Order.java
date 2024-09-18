@@ -35,7 +35,7 @@ public class Order {
     @JoinColumn(name = "restaurant_id", nullable = false, updatable = false)
     private Restaurant restaurant;*/
     @Column(name = "restaurant_id", nullable = false, updatable = false)
-    private UUID restaurantId;
+    private String restaurantId;
 
     @Column(name = "delivery_fee", nullable = false)
     private float deliveryFee;
@@ -63,11 +63,11 @@ public class Order {
         this.userId = userId;
     }
 
-    public UUID getRestaurantId() {
+    public String getRestaurantId() {
         return restaurantId;
     }
 
-    public void setRestaurantId(UUID restaurantId) {
+    public void setRestaurantId(String restaurantId) {
         this.restaurantId = restaurantId;
     }
 

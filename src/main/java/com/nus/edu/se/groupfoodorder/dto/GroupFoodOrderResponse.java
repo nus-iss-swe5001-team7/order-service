@@ -17,7 +17,7 @@ public class GroupFoodOrderResponse {
 
     private UUID groupFoodOrderId;
 
-    List<OrderDetailResponse> orderDetailDtoList;
+    List<OrderDetailDTO> orderDetailDtoList;
 
     Date deliveryTime;
 

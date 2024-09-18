@@ -1,4 +1,4 @@
-package com.nus.edu.se.groupfoodorder.dto;
+package com.nus.edu.se.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class UsersResponse {
 
-    private UUID id;
+    private UUID userId;
     private String name;
     private String password;
     private String email;

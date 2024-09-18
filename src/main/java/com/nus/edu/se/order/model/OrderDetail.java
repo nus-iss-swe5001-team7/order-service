@@ -29,7 +29,7 @@ public class OrderDetail {
     private UUID orderItemId;
 
     @Column(name = "menu_id", nullable = false)
-    private UUID menuId;
+    private String menuId;
 
     @Column(name = "order_item_quantity")
     private Integer quantity;
