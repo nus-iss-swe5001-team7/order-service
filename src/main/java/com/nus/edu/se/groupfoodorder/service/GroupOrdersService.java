@@ -66,25 +66,26 @@ public class GroupOrdersService {
 
             // find the order that associate to the group order
             List<Order> orderList = orderRepository.findOrderByGroupFoodOrderOrderByCreatedTimeAsc(order);
-            List<String> userIds = orderList.stream().map(orderItem-> orderItem.getId().toString()).toList();
-            Order firstOrder = orderList.get(0);
+            if (orderList.size()>0) { // to handle inconsistent of group_food_orders and order_items if any failure
+                List<String> userIds = orderList.stream().map(orderItem -> orderItem.getId().toString()).toList();
+                Order firstOrder = orderList.get(0);
 
-            // find the restaurant that assocaite to the order
-            String restaurantId = firstOrder.getRestaurantId();
-            RestaurantResponse restaurant =restaurantService.getRestaurantById(restaurantId);
+                // find the restaurant that assocaite to the order
+                String restaurantId = firstOrder.getRestaurantId();
+                RestaurantResponse restaurant = restaurantService.getRestaurantById(restaurantId);
 
-            if (restaurant != null) {
-                dto.setRestaurantId(restaurant.getId());
-                dto.setRestaurantName(restaurant.getRestaurantName());
-                dto.setLocation(restaurant.getLocation());
-                dto.setRating(String.valueOf(restaurant.getRating()));
-                dto.setImgUrl(restaurant.getRestaurantImgURL());
+                if (restaurant != null) {
+                    dto.setRestaurantId(restaurant.getId());
+                    dto.setRestaurantName(restaurant.getRestaurantName());
+                    dto.setLocation(restaurant.getLocation());
+                    dto.setRating(String.valueOf(restaurant.getRating()));
+                    dto.setImgUrl(restaurant.getRestaurantImgURL());
+                }
+
+                if (!userIds.contains(userId)) {
+                    groupFoodOrderList.add(dto);
+                }
             }
-
-            if (!userIds.contains(userId)) {
-                groupFoodOrderList.add(dto);
-            }
-
         }
 
         return groupFoodOrderList;
