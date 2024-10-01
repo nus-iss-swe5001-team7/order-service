@@ -1,18 +1,19 @@
 
 package com.nus.edu.se.payment.boundary;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.nus.edu.se.exception.AuthenticationException;
 import com.nus.edu.se.exception.DataNotFoundException;
 import com.nus.edu.se.groupfoodorder.dao.GroupOrderRepository;
 import com.nus.edu.se.groupfoodorder.model.GroupFoodOrder;
 import com.nus.edu.se.groupfoodorder.service.GroupOrdersService;
+import com.nus.edu.se.groupfoodorder.service.JwtTokenInterface;
 import com.nus.edu.se.groupfoodorder.service.timer.TimerService;
 import com.nus.edu.se.order.dao.OrderRepository;
 import com.nus.edu.se.order.model.Order;
 import com.nus.edu.se.payment.pricing.DecoratorGenerator;
 import com.nus.edu.se.payment.pricing.FoodCart;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,177 +41,184 @@ public class PaymentResource {
     @Autowired
     private GroupOrdersService groupOrdersService;
 
+    @Autowired
+    JwtTokenInterface jwtTokenInterface;
+
     @Transactional
     @PutMapping(value = "/updatePayment", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> updatePaymentStatus(@RequestBody JsonNode paymentDetailsN){
+    public ResponseEntity<String> updatePaymentStatus(@RequestBody JsonNode paymentDetailsN, HttpServletRequest request) throws  org.apache.tomcat.websocket.AuthenticationException {
+        String token = groupOrdersService.resolveToken(request);
+        if (Boolean.TRUE.equals(jwtTokenInterface.validateToken(token).getBody())) {
 
-        /*  examlpe of paymentDetailsN
-        paymentDetailsN = {
-            "orderItemId": aaaa1111-1111-1111-1111-111111111111,
-            "paymentStatus": "PENDING",
-            "isGroupFoodOrder": true,
-            "isGetPromo": true,
-            "totalPrice": 123.00,
-            "forShow": false
-        }
-        where,
-        "isGroupFoodOrder" takes string, convert to a boolean value
-        "isGetPromo" takes string, convert to a boolean value
-        "totalPrice" takes string, convert to a float
+            /*  examlpe of paymentDetailsN
+            paymentDetailsN = {
+                "orderItemId": aaaa1111-1111-1111-1111-111111111111,
+                "paymentStatus": "PENDING",
+                "isGroupFoodOrder": true,
+                "isGetPromo": true,
+                "totalPrice": 123.00,
+                "forShow": false
+            }
+            where,
+            "isGroupFoodOrder" takes string, convert to a boolean value
+            "isGetPromo" takes string, convert to a boolean value
+            "totalPrice" takes string, convert to a float
 
-        Actual paymentDetailsN sent from frontend
-        {"orderItemId":"e4d0ab16-d7bd-48a2-a383-ac251a17c086",
-        "paymentStatus":"PENDING",
-        "isGroupFoodOrder":{"__v_isShallow":false,"__v_isRef":true,"_rawValue":true,"_value":true},
-        "isGetPromo":{"__v_isShallow":false,"__v_isRef":true,"_rawValue":false,"_value":false},
-        "totalPrice":9.79,
-        "forShow":{"__v_isShallow":false,"__v_isRef":true,"_rawValue":false,"_value":false}}
-        */
+            Actual paymentDetailsN sent from frontend
+            {"orderItemId":"e4d0ab16-d7bd-48a2-a383-ac251a17c086",
+            "paymentStatus":"PENDING",
+            "isGroupFoodOrder":{"__v_isShallow":false,"__v_isRef":true,"_rawValue":true,"_value":true},
+            "isGetPromo":{"__v_isShallow":false,"__v_isRef":true,"_rawValue":false,"_value":false},
+            "totalPrice":9.79,
+            "forShow":{"__v_isShallow":false,"__v_isRef":true,"_rawValue":false,"_value":false}}
+            */
 
-        System.out.println(paymentDetailsN);
-        System.out.println("Inside the JsonNode function");
-        JsonNode orderItemIdNode = paymentDetailsN.get("orderItemId");
-        JsonNode paymentStatusNode = paymentDetailsN.get("paymentStatus");
-        JsonNode isGroupFoodOrderNode = paymentDetailsN.get("isGroupFoodOrder");
-        JsonNode isGetPromoNode = paymentDetailsN.get("isGetPromo");
-        JsonNode totalPriceNode = paymentDetailsN.get("totalPrice");
-        JsonNode isForShowNode = paymentDetailsN.get("forShow");
-        JsonNode selectedPaymentMethod = paymentDetailsN.get("paymentType"); //need to comment
+            System.out.println(paymentDetailsN);
+            System.out.println("Inside the JsonNode function");
+            JsonNode orderItemIdNode = paymentDetailsN.get("orderItemId");
+            JsonNode paymentStatusNode = paymentDetailsN.get("paymentStatus");
+            JsonNode isGroupFoodOrderNode = paymentDetailsN.get("isGroupFoodOrder");
+            JsonNode isGetPromoNode = paymentDetailsN.get("isGetPromo");
+            JsonNode totalPriceNode = paymentDetailsN.get("totalPrice");
+            JsonNode isForShowNode = paymentDetailsN.get("forShow");
+            JsonNode selectedPaymentMethod = paymentDetailsN.get("paymentType"); //need to comment
 
 
-        System.out.println(isGroupFoodOrderNode);
-        System.out.println(isGetPromoNode);
-        System.out.println("selected payment method is :");
-        System.out.println(selectedPaymentMethod);
-        // type conversion to be used by foodCart
-        boolean isGroupFoodOrderStrategy = isGroupFoodOrderNode != null && isGroupFoodOrderNode.asBoolean();
-        // boolean isGroupFoodOrderStrategy = isGroupFoodOrderNode.get("_value").asBoolean();
-        boolean isGetPromoDecorator = isGetPromoNode != null && isGetPromoNode.asBoolean();
-        // boolean isGetPromoDecorator = isGetPromoNode.get("_value").asBoolean();
-        // boolean isForShow = isForShowNode.get("_value").asBoolean();
-        boolean isForShow = isForShowNode != null && isForShowNode.asBoolean();
+            System.out.println(isGroupFoodOrderNode);
+            System.out.println(isGetPromoNode);
+            System.out.println("selected payment method is :");
+            System.out.println(selectedPaymentMethod);
+            // type conversion to be used by foodCart
+            boolean isGroupFoodOrderStrategy = isGroupFoodOrderNode != null && isGroupFoodOrderNode.asBoolean();
+            // boolean isGroupFoodOrderStrategy = isGroupFoodOrderNode.get("_value").asBoolean();
+            boolean isGetPromoDecorator = isGetPromoNode != null && isGetPromoNode.asBoolean();
+            // boolean isGetPromoDecorator = isGetPromoNode.get("_value").asBoolean();
+            // boolean isForShow = isForShowNode.get("_value").asBoolean();
+            boolean isForShow = isForShowNode != null && isForShowNode.asBoolean();
 
-        String totalPriceString = totalPriceNode != null ? totalPriceNode.asText() : "0.0";
-        System.out.println("isForShow");
-        System.out.println(isForShow);
-        // call FoodCart if isForShow
-        System.out.printf("Is for show?: %b\n",isForShow);
-        float totalPrice = Float.parseFloat(totalPriceString);
+            String totalPriceString = totalPriceNode != null ? totalPriceNode.asText() : "0.0";
+            System.out.println("isForShow");
+            System.out.println(isForShow);
+            // call FoodCart if isForShow
+            System.out.printf("Is for show?: %b\n",isForShow);
+            float totalPrice = Float.parseFloat(totalPriceString);
 
-        System.out.println(orderItemIdNode);
-        System.out.println(totalPriceString);
-        System.out.println(isGetPromoDecorator);
-        System.out.println(isGroupFoodOrderStrategy);
-        if (isForShow) {
-            DecoratorGenerator gen = new DecoratorGenerator();
-            DecoratorGenerator.PromoType selectedPromo = gen.generateRandomDecorator();
-            System.out.printf("Generated Promotion:: %s\n",selectedPromo);
-            FoodCart foodCart = new FoodCart(isGroupFoodOrderStrategy, isGetPromoDecorator, totalPrice, selectedPromo);
-            float finalTotalPrice = foodCart.checkout();
+            System.out.println(orderItemIdNode);
+            System.out.println(totalPriceString);
+            System.out.println(isGetPromoDecorator);
+            System.out.println(isGroupFoodOrderStrategy);
+            if (isForShow) {
+                DecoratorGenerator gen = new DecoratorGenerator();
+                DecoratorGenerator.PromoType selectedPromo = gen.generateRandomDecorator();
+                System.out.printf("Generated Promotion:: %s\n",selectedPromo);
+                FoodCart foodCart = new FoodCart(isGroupFoodOrderStrategy, isGetPromoDecorator, totalPrice, selectedPromo);
+                float finalTotalPrice = foodCart.checkout();
 
-            // System.out.printf("Final total Price: %.2f%n", finalTotalPrice);
+                // System.out.printf("Final total Price: %.2f%n", finalTotalPrice);
 
-            String formattedStringPrice = String.format("%.2f", finalTotalPrice);
-            System.out.printf("Final total Price: %s\n",formattedStringPrice);
-            formattedStringPrice = formattedStringPrice.concat(" ").concat(selectedPromo.name());
-            System.out.printf("Final String: %s\n",formattedStringPrice);
-            return new ResponseEntity<>(formattedStringPrice, HttpStatus.OK);
-        }
+                String formattedStringPrice = String.format("%.2f", finalTotalPrice);
+                System.out.printf("Final total Price: %s\n",formattedStringPrice);
+                formattedStringPrice = formattedStringPrice.concat(" ").concat(selectedPromo.name());
+                System.out.printf("Final String: %s\n",formattedStringPrice);
+                return new ResponseEntity<>(formattedStringPrice, HttpStatus.OK);
+            }
 
-        // String selectedPaymentOption = paymentDetailsN.get("selectedPaymentOption").asText(); //need to uncomment
-        String selectedPaymentOption = selectedPaymentMethod.get("_value").asText(); //need to comment
-        System.out.println("Selected Payment Option is :");
-        System.out.println(selectedPaymentOption);
+            // String selectedPaymentOption = paymentDetailsN.get("selectedPaymentOption").asText(); //need to uncomment
+            String selectedPaymentOption = selectedPaymentMethod.get("_value").asText(); //need to comment
+            System.out.println("Selected Payment Option is :");
+            System.out.println(selectedPaymentOption);
 
-        // float totalPrice = Float.parseFloat(totalPriceString);
+            // float totalPrice = Float.parseFloat(totalPriceString);
 
-        // System.out.println(orderItemIdNode);
-        // System.out.println(totalPriceString);
-        // System.out.println(isGetPromoDecorator);
-        // System.out.println(isGroupFoodOrderStrategy);
+            // System.out.println(orderItemIdNode);
+            // System.out.println(totalPriceString);
+            // System.out.println(isGetPromoDecorator);
+            // System.out.println(isGroupFoodOrderStrategy);
 
-        // if (isForShow) {
-        //     DecoratorGenerator gen = new DecoratorGenerator();
-        //     FoodCart foodCart = new FoodCart(isGroupFoodOrderStrategy, isGetPromoDecorator, totalPrice, gen);
-        //     float finalTotalPrice = foodCart.checkout();
+            // if (isForShow) {
+            //     DecoratorGenerator gen = new DecoratorGenerator();
+            //     FoodCart foodCart = new FoodCart(isGroupFoodOrderStrategy, isGetPromoDecorator, totalPrice, gen);
+            //     float finalTotalPrice = foodCart.checkout();
 
-        //     // System.out.printf("Final total Price: %.2f%n", finalTotalPrice);
+            //     // System.out.printf("Final total Price: %.2f%n", finalTotalPrice);
 
-        //     String formattedStringPrice = String.format("%.2f", finalTotalPrice);
-        //     System.out.printf("Final total Price: %s\n",formattedStringPrice);
+            //     String formattedStringPrice = String.format("%.2f", finalTotalPrice);
+            //     System.out.printf("Final total Price: %s\n",formattedStringPrice);
 
-        //     return new ResponseEntity<>(formattedStringPrice, HttpStatus.OK);
-        // }
+            //     return new ResponseEntity<>(formattedStringPrice, HttpStatus.OK);
+            // }
 
-        UUID orderItemId;
-        try {
-            orderItemId = UUID.fromString(orderItemIdNode.asText());
-            System.out.println(orderItemId);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>("Invalid orderItemId format", HttpStatus.BAD_REQUEST);
-        }
+            UUID orderItemId;
+            try {
+                orderItemId = UUID.fromString(orderItemIdNode.asText());
+                System.out.println(orderItemId);
+            } catch (IllegalArgumentException e) {
+                return new ResponseEntity<>("Invalid orderItemId format", HttpStatus.BAD_REQUEST);
+            }
 
-       // Order order = orderRepository.findByOrderItemId(orderItemId);
-        Order order = orderRepository.findById(orderItemId).orElse(null);
+           // Order order = orderRepository.findByOrderItemId(orderItemId);
+            Order order = orderRepository.findById(orderItemId).orElse(null);
 
-        if (order == null) {
-            return new ResponseEntity<>("Order not found", HttpStatus.NOT_FOUND);
-        }
+            if (order == null) {
+                return new ResponseEntity<>("Order not found", HttpStatus.NOT_FOUND);
+            }
 
-        PaymentGatewayInterface paymentGateway;
+            PaymentGatewayInterface paymentGateway;
 
-        switch(selectedPaymentOption) {
-            case "creditCard":
-                CCPaymentInterface creditCardPayment = new CreditCard();
-                paymentGateway = new CreditCardAdapter(creditCardPayment);
-                break;
-            case "payNow":
-                    PayNowPaymentInterface payNowPayment = new PayNow();
-                    paymentGateway = new PayNowAdapter(payNowPayment);
+            switch(selectedPaymentOption) {
+                case "creditCard":
+                    CCPaymentInterface creditCardPayment = new CreditCard();
+                    paymentGateway = new CreditCardAdapter(creditCardPayment);
                     break;
-            case "payLah":
-                PayLahPaymentInterface payLahPayment = new PayLah();
-                paymentGateway = new PayLahAdapter(payLahPayment);
-                break;
-            default:
-                return new ResponseEntity<>("Invalid payment status value", HttpStatus.BAD_REQUEST);
-        }
-        paymentGateway.processPayment();
+                case "payNow":
+                        PayNowPaymentInterface payNowPayment = new PayNow();
+                        paymentGateway = new PayNowAdapter(payNowPayment);
+                        break;
+                case "payLah":
+                    PayLahPaymentInterface payLahPayment = new PayLah();
+                    paymentGateway = new PayLahAdapter(payLahPayment);
+                    break;
+                default:
+                    return new ResponseEntity<>("Invalid payment status value", HttpStatus.BAD_REQUEST);
+            }
+            paymentGateway.processPayment();
 
-        String paymentStatusValue = paymentStatusNode.asText();
-        System.out.println(paymentStatusValue);
-        switch (paymentStatusValue) {
-            case "COMPLETED":
-                order.setPaymentStatus(Order.PaymentStatus.COMPLETED);
-                break;
-            case "FAILED":
-                order.setPaymentStatus(Order.PaymentStatus.FAILED);
-                break;
-            case "PENDING":
-                GroupFoodOrder groupFoodOrder = groupOrderRepository.findGroupFoodOrderById(order.getGroupFoodOrder().getId()).orElseThrow(() -> new DataNotFoundException("Group Order Not Found."));
-                if (groupOrdersService.groupFoodOrderNotValidToJoin(groupFoodOrder)) {
-                    groupOrdersService.deleteOrder(order.getId().toString());
-                    throw new AuthenticationException("Group Order already submitted to restaurant, please join other group orders!");
-                } else {
+            String paymentStatusValue = paymentStatusNode.asText();
+            System.out.println(paymentStatusValue);
+            switch (paymentStatusValue) {
+                case "COMPLETED":
                     order.setPaymentStatus(Order.PaymentStatus.COMPLETED);
-                }
-                break;
-            case "PROCESSING":
-                order.setPaymentStatus(Order.PaymentStatus.PROCESSING);
-                break;
-            default:
-                return new ResponseEntity<>("Invalid payment status value", HttpStatus.BAD_REQUEST);
+                    break;
+                case "FAILED":
+                    order.setPaymentStatus(Order.PaymentStatus.FAILED);
+                    break;
+                case "PENDING":
+                    GroupFoodOrder groupFoodOrder = groupOrderRepository.findGroupFoodOrderById(order.getGroupFoodOrder().getId()).orElseThrow(() -> new DataNotFoundException("Group Order Not Found."));
+                    if (groupOrdersService.groupFoodOrderNotValidToJoin(groupFoodOrder)) {
+                        groupOrdersService.deleteOrder(order.getId().toString());
+                        throw new AuthenticationException("Group Order already submitted to restaurant, please join other group orders!");
+                    } else {
+                        order.setPaymentStatus(Order.PaymentStatus.COMPLETED);
+                    }
+                    break;
+                case "PROCESSING":
+                    order.setPaymentStatus(Order.PaymentStatus.PROCESSING);
+                    break;
+                default:
+                    return new ResponseEntity<>("Invalid payment status value", HttpStatus.BAD_REQUEST);
+            }
+
+            orderRepository.save(order);
+
+            timerService.startTimerForOrder(order.getGroupFoodOrder().getId().toString());
+
+            System.out.println("Order " + order.getGroupFoodOrder().getId().toString() + " Timer started!");
+            System.out.println("method done running");
+
+            return new ResponseEntity<>("Payment status updated successfully", HttpStatus.OK);
+        } else {
+            throw new org.apache.tomcat.websocket.AuthenticationException("User is not authenticated to updatePaymentStatus!");
         }
-
-        orderRepository.save(order);
-
-
-        timerService.startTimerForOrder(order.getGroupFoodOrder().getId().toString());
-
-        System.out.println("Order " + order.getGroupFoodOrder().getId().toString() + " Timer started!");
-        System.out.println("method done running");
-
-        return new ResponseEntity<>("Payment status updated successfully", HttpStatus.OK);
     }
 
 

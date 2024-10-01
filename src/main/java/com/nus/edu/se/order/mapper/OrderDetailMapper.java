@@ -1,6 +1,6 @@
 package com.nus.edu.se.order.mapper;
 
-import com.nus.edu.se.groupfoodorder.dto.OrderDetailDTO;
+import com.nus.edu.se.order.dto.OrderDetailDTO;
 import com.nus.edu.se.menu.dto.MenuResponse;
 import com.nus.edu.se.menu.service.MenuService;
 import com.nus.edu.se.order.model.Order;
@@ -15,19 +15,20 @@ public class OrderDetailMapper {
     @Autowired
     private MenuService menuService;
 
-    public OrderDetail fromOrderDetailDTOToOrderDetail(OrderDetailDTO orderDetailDTO, Order order) {
+    public OrderDetail fromOrderDetailDTOToOrderDetail(OrderDetailDTO orderDetailDTO, Order order, String token) {
         OrderDetail orderDetail = new OrderDetail();
-        MenuResponse menu = menuService.findById(orderDetailDTO.getMenuId());
+        MenuResponse menu = menuService.findById(orderDetailDTO.getMenuId(), token);
         orderDetail.setMenuId(menu.getId());
-        orderDetail.setOrderItemId(order.getId());
+//        orderDetail.setOrderItemId(order.getId());
+        orderDetail.setOrder(order);
         orderDetail.setQuantity(orderDetailDTO.getQuantity());
         return orderDetail;
     }
 
-    public List<OrderDetailDTO> fromOrderDetailToOrderDetailDTO(List<OrderDetail> orderDetails) {
+    public List<OrderDetailDTO> fromOrderDetailToOrderDetailDTO(List<OrderDetail> orderDetails, String token) {
         return orderDetails.stream()
                 .map(orderDetail -> {
-                    MenuResponse menu = menuService.findById(orderDetail.getMenuId());
+                    MenuResponse menu = menuService.findById(orderDetail.getMenuId(), token);
                     OrderDetailDTO orderDetailDTO = new OrderDetailDTO();
                     orderDetailDTO.setMenuId(orderDetail.getMenuId());
                     orderDetailDTO.setPrice(menu.getMenuPrice());
@@ -38,5 +39,17 @@ public class OrderDetailMapper {
                     return orderDetailDTO;
                 })
                 .collect(Collectors.toList());
+    }
+
+    public OrderDetailDTO fromOrderDetailToOrderDetailDTO(OrderDetail orderDetail,MenuResponse menu) {
+        OrderDetailDTO orderDetailDto = new OrderDetailDTO();
+
+        orderDetailDto.setQuantity(orderDetail.getQuantity());
+        orderDetailDto.setName(menu.getMenuName());
+        orderDetailDto.setImgUrl(menu.getMenuImageURL());
+        orderDetailDto.setDescription(menu.getDescription());
+        orderDetailDto.setPrice(menu.getMenuPrice());
+
+        return orderDetailDto;
     }
 }

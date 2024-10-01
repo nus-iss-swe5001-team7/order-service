@@ -1,5 +1,6 @@
 package com.nus.edu.se.groupfoodorder.dto;
 
+import com.nus.edu.se.order.dto.OrderDetailDTO;
 import lombok.*;
 
 import java.util.Date;

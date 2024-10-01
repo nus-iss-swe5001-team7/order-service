@@ -1,9 +1,6 @@
 package com.nus.edu.se.order.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,8 +22,11 @@ public class OrderDetail {
     @Column(name = "order_detail_id", nullable = false)
     private UUID id;
 
-    @Column(name = "order_item_id", nullable = false)
-    private UUID orderItemId;
+//    @Column(name = "order_item_id", nullable = false)
+//    private UUID orderItemId;
+    @ManyToOne
+    @JoinColumn(name = "order_item_id", nullable = false)
+    private Order order;
 
     @Column(name = "menu_id", nullable = false)
     private String menuId;
