@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nus.edu.se.exception.AuthenticationException;
 import com.nus.edu.se.exception.DataNotFoundException;
 import com.nus.edu.se.groupfoodorder.dao.GroupOrderRepository;
-import com.nus.edu.se.groupfoodorder.dto.GroupFoodOrderList;
-import com.nus.edu.se.groupfoodorder.dto.GroupFoodOrderResponse;
-import com.nus.edu.se.groupfoodorder.dto.OrderRequest;
-import com.nus.edu.se.groupfoodorder.dto.OrderResponse;
+import com.nus.edu.se.groupfoodorder.dto.*;
 import com.nus.edu.se.groupfoodorder.model.GroupFoodOrder;
 import com.nus.edu.se.groupfoodorder.service.GroupOrderFilterStrategy;
 import com.nus.edu.se.groupfoodorder.service.GroupOrderFilterStrategyFactory;
@@ -182,4 +179,12 @@ public class GroupOrderController {
 
         return groupOrders;
     }
+
+    @GetMapping("/getInfoForGroupOrder")
+    public ResponseEntity<JointGroupFoodOrderDTO> getInfoForGroupOrder(@RequestParam UUID groupOrderId, HttpServletRequest request) throws org.apache.tomcat.websocket.AuthenticationException {
+        String token = groupOrdersService.resolveToken(request);
+
+        return groupOrdersService.getInfoForGroupOrder(groupOrderId, token);
+    }
+
 }

@@ -4,6 +4,7 @@ import com.nus.edu.se.exception.DataNotFoundException;
 import com.nus.edu.se.groupfoodorder.dao.GroupOrderRepository;
 import com.nus.edu.se.groupfoodorder.dto.GroupFoodOrderList;
 import com.nus.edu.se.groupfoodorder.dto.GroupFoodOrderResponse;
+import com.nus.edu.se.groupfoodorder.dto.JointGroupFoodOrderDTO;
 import com.nus.edu.se.groupfoodorder.model.GroupFoodOrder;
 import com.nus.edu.se.mapper.GroupOrderMapper;
 import com.nus.edu.se.menu.dto.MenuResponse;
@@ -22,11 +23,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
-import com.nus.edu.se.groupfoodorder.service.JwtTokenInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +87,7 @@ public class GroupOrdersService {
 
                 // find the order that associate to the group order
                 List<Order> orderList = orderRepository.findOrderByGroupFoodOrderOrderByCreatedTimeAsc(order);
-                if (orderList.size()>0) { // to handle inconsistent of group_food_orders and order_items due to any failure
+                if (!orderList.isEmpty()) { // to handle inconsistent of group_food_orders and order_items due to any failure
                     List<String> userIds = orderList.stream().map(orderItem -> orderItem.getId().toString()).toList();
                     Order firstOrder = orderList.get(0);
 
@@ -198,4 +199,26 @@ public class GroupOrdersService {
         return null;
     }
 
+    public ResponseEntity<JointGroupFoodOrderDTO> getInfoForGroupOrder(UUID groupOrderId, String token){
+        JointGroupFoodOrderDTO jointGroupFoodOrder = new JointGroupFoodOrderDTO();
+
+        GroupFoodOrder order = groupOrderRepository.findById(groupOrderId).orElseThrow(() -> new DataNotFoundException("Group Order Not Found."));
+
+        List<Order> orderList = orderRepository.findOrderByGroupFoodOrderOrderByCreatedTimeAsc(order);
+        if (!orderList.isEmpty()) {
+            Order firstOrder = orderList.get(0);
+            String restaurantId = firstOrder.getRestaurantId();
+            RestaurantResponse restaurant = restaurantService.getRestaurantById(restaurantId, token);
+
+            jointGroupFoodOrder.setRestaurantId(restaurantId);
+            jointGroupFoodOrder.setMainOrderId(firstOrder.getId().toString());
+            jointGroupFoodOrder.setNumberOfUsers(orderList.size());
+        }
+
+        jointGroupFoodOrder.setStatus(order.getStatus().toString());
+        jointGroupFoodOrder.setDeliveryLocation(order.getDeliveryLocation());
+        jointGroupFoodOrder.setGroupOrderDeliveryFee(order.getDeliveryFee());
+
+        return ResponseEntity.ok(jointGroupFoodOrder);
+    }
 }
