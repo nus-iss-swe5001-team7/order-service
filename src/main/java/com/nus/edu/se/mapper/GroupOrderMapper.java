@@ -15,7 +15,7 @@ public class GroupOrderMapper {
 
         UUID orderID = order.getId(); // orderId
         String orderStatus = groupFoodOrder != null ? groupFoodOrder.getStatus().name() : null;
-        Date orderCreatedTime = order != null ? order.getCreatedTime() : null;
+        Date orderCreatedTime = groupFoodOrder != null && groupFoodOrder.getGroupOrderCreateTime() != null ? groupFoodOrder.getGroupOrderCreateTime() : null;
 
         GroupFoodOrderResponse groupFoodOrderDTO = new GroupFoodOrderResponse();
         groupFoodOrderDTO.setOrderId(orderID);

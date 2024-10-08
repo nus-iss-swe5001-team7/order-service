@@ -77,7 +77,6 @@ public class GroupOrderController {
                     throw new AuthenticationException("Group Order not valid to join, please join other group orders!");
                 }
             } else {
-                groupFoodOrder.setGroupOrderCreateTime(new Date());
                 groupFoodOrder.setDeliveryFee(orderRequest.getDeliveryFee());
                 groupFoodOrder.setDeliveryLocation(orderRequest.getLocation());
                 groupFoodOrder = groupOrderRepository.save(groupFoodOrder);

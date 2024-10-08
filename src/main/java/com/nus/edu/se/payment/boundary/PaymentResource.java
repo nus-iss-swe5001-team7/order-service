@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.UUID;
 
 @Slf4j
@@ -49,29 +50,6 @@ public class PaymentResource {
     public ResponseEntity<String> updatePaymentStatus(@RequestBody JsonNode paymentDetailsN, HttpServletRequest request) throws  org.apache.tomcat.websocket.AuthenticationException {
         String token = groupOrdersService.resolveToken(request);
         if (Boolean.TRUE.equals(jwtTokenInterface.validateToken(token).getBody())) {
-
-            /*  examlpe of paymentDetailsN
-            paymentDetailsN = {
-                "orderItemId": aaaa1111-1111-1111-1111-111111111111,
-                "paymentStatus": "PENDING",
-                "isGroupFoodOrder": true,
-                "isGetPromo": true,
-                "totalPrice": 123.00,
-                "forShow": false
-            }
-            where,
-            "isGroupFoodOrder" takes string, convert to a boolean value
-            "isGetPromo" takes string, convert to a boolean value
-            "totalPrice" takes string, convert to a float
-
-            Actual paymentDetailsN sent from frontend
-            {"orderItemId":"e4d0ab16-d7bd-48a2-a383-ac251a17c086",
-            "paymentStatus":"PENDING",
-            "isGroupFoodOrder":{"__v_isShallow":false,"__v_isRef":true,"_rawValue":true,"_value":true},
-            "isGetPromo":{"__v_isShallow":false,"__v_isRef":true,"_rawValue":false,"_value":false},
-            "totalPrice":9.79,
-            "forShow":{"__v_isShallow":false,"__v_isRef":true,"_rawValue":false,"_value":false}}
-            */
 
             System.out.println(paymentDetailsN);
             System.out.println("Inside the JsonNode function");
@@ -124,29 +102,9 @@ public class PaymentResource {
             }
 
             // String selectedPaymentOption = paymentDetailsN.get("selectedPaymentOption").asText(); //need to uncomment
-            String selectedPaymentOption = selectedPaymentMethod.get("_value").asText(); //need to comment
+            String selectedPaymentOption = selectedPaymentMethod.asText(); //need to comment
             System.out.println("Selected Payment Option is :");
             System.out.println(selectedPaymentOption);
-
-            // float totalPrice = Float.parseFloat(totalPriceString);
-
-            // System.out.println(orderItemIdNode);
-            // System.out.println(totalPriceString);
-            // System.out.println(isGetPromoDecorator);
-            // System.out.println(isGroupFoodOrderStrategy);
-
-            // if (isForShow) {
-            //     DecoratorGenerator gen = new DecoratorGenerator();
-            //     FoodCart foodCart = new FoodCart(isGroupFoodOrderStrategy, isGetPromoDecorator, totalPrice, gen);
-            //     float finalTotalPrice = foodCart.checkout();
-
-            //     // System.out.printf("Final total Price: %.2f%n", finalTotalPrice);
-
-            //     String formattedStringPrice = String.format("%.2f", finalTotalPrice);
-            //     System.out.printf("Final total Price: %s\n",formattedStringPrice);
-
-            //     return new ResponseEntity<>(formattedStringPrice, HttpStatus.OK);
-            // }
 
             UUID orderItemId;
             try {
@@ -199,6 +157,7 @@ public class PaymentResource {
                         throw new AuthenticationException("Group Order already submitted to restaurant, please join other group orders!");
                     } else {
                         order.setPaymentStatus(Order.PaymentStatus.COMPLETED);
+                        groupFoodOrder.setGroupOrderCreateTime(new Date());
                     }
                     break;
                 case "PROCESSING":
