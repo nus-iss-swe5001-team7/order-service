@@ -1,6 +1,7 @@
 package com.nus.edu.se.groupfoodorder.model;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Date;
@@ -17,7 +18,7 @@ public class GroupFoodOrder {
     @Column(name = "group_food_order_id", nullable = false)
     private UUID id;
 
-    @Column(name = "group_food_order_create_time", nullable = false)
+    @Column(name = "group_food_order_create_time")
     private Date groupOrderCreateTime;
 
     @Column(name = "group_food_order_delivery_time")

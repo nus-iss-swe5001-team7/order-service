@@ -2,6 +2,7 @@ package com.nus.edu.se.order.model;
 
 import com.nus.edu.se.groupfoodorder.model.GroupFoodOrder;
 import jakarta.persistence.*;
+import lombok.Builder;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Date;
