@@ -11,6 +11,7 @@ import com.nus.edu.se.groupfoodorder.service.GroupOrderFilterStrategy;
 import com.nus.edu.se.groupfoodorder.service.GroupOrderFilterStrategyFactory;
 import com.nus.edu.se.groupfoodorder.service.GroupOrdersService;
 import com.nus.edu.se.groupfoodorder.service.JwtTokenInterface;
+import com.nus.edu.se.groupfoodorder.service.orderstatus.OrderStatusService;
 import com.nus.edu.se.order.dao.OrderDetailRepository;
 import com.nus.edu.se.order.dao.OrderRepository;
 import com.nus.edu.se.order.dto.OrderDetailDTO;
@@ -30,10 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -55,7 +53,8 @@ public class GroupOrderController {
 
     @Autowired
     private RestaurantService restaurantService;
-
+    @Autowired
+    private OrderStatusService orderStatusService;
     @Autowired
     private UsersService usersService;
     @Autowired
@@ -148,6 +147,8 @@ public class GroupOrderController {
 
     @GetMapping("/getAllPendingJoinGroupOrders")
     public ResponseEntity<List<GroupFoodOrderList>> getAllGroupFoodOrder(@RequestParam UUID userId, HttpServletRequest request) throws org.apache.tomcat.websocket.AuthenticationException {
+        System.out.println("getAllPendingJoinGroupOrders: Start");
+
         String token = groupOrdersService.resolveToken(request);
 
         if (Boolean.TRUE.equals(jwtTokenInterface.validateToken(token).getBody())) {
@@ -169,6 +170,7 @@ public class GroupOrderController {
 
     @GetMapping("/groupOrders")
     public List<?> findAllByUserId(@RequestParam(value = "parameter") String userId, HttpServletRequest request) throws org.apache.tomcat.websocket.AuthenticationException {
+
         String token = groupOrdersService.resolveToken(request);
 
         UUID userUUID = UUID.fromString(userId);
@@ -184,6 +186,120 @@ public class GroupOrderController {
         String token = groupOrdersService.resolveToken(request);
 
         return groupOrdersService.getInfoForGroupOrder(groupOrderId, token);
+    }
+
+    @PutMapping("/submittedToRestaurant/{orderId}")
+    public ResponseEntity updateStatusToSubmittedToRestaurant(@PathVariable("orderId") String orderId,HttpServletRequest request) throws org.apache.tomcat.websocket.AuthenticationException {
+
+        String token = groupOrdersService.resolveToken(request);
+
+        if (Boolean.TRUE.equals(jwtTokenInterface.validateToken(token).getBody())) {
+            try {
+                orderStatusService.submittedToRestaurant(orderId);
+                return new ResponseEntity<>(HttpStatus.OK);
+            } catch (Exception e) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("fail_message", "updateStatusToSubmittedToRestaurant Not found GroupOrder with orderId");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+        } else {
+            throw new org.apache.tomcat.websocket.AuthenticationException("User is not authenticated to submitted order To Restaurant!");
+        }
+    }
+
+    @PutMapping("/orderCancel/{orderId}")
+    public ResponseEntity updateStatusToOrderCancel(@PathVariable("orderId") String orderId,HttpServletRequest request) throws org.apache.tomcat.websocket.AuthenticationException {
+
+        String token = groupOrdersService.resolveToken(request);
+
+        if (Boolean.TRUE.equals(jwtTokenInterface.validateToken(token).getBody())) {
+            try {
+                orderStatusService.orderCancel(orderId);
+                return new ResponseEntity<>(HttpStatus.OK);
+            } catch (Exception e) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("fail_message", "updateStatusToOrderCancel Not found GroupOrder with orderId");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+        } else {
+            throw new org.apache.tomcat.websocket.AuthenticationException("User is not authenticated to submitted order To Restaurant!");
+        }
+    }
+
+    @PutMapping("/kitchenPreparing/{orderId}")
+    public ResponseEntity updateStatusToKitchenPreparing(@PathVariable("orderId") String orderId,HttpServletRequest request) throws org.apache.tomcat.websocket.AuthenticationException {
+
+        String token = groupOrdersService.resolveToken(request);
+
+        if (Boolean.TRUE.equals(jwtTokenInterface.validateToken(token).getBody())) {
+            try {
+                orderStatusService.kitchenPreparing(orderId);
+                return new ResponseEntity<>(HttpStatus.OK);
+            } catch (Exception e) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("fail_message", "updateStatusToKitchenPreparing Not found GroupOrder with orderId");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+        } else {
+            throw new org.apache.tomcat.websocket.AuthenticationException("User is not authenticated to submitted order To Restaurant!");
+        }
+    }
+
+    @PutMapping("/readyForDelivery/{orderId}")
+    public ResponseEntity updateStatusToReadyForDelivery(@PathVariable("orderId") String orderId,HttpServletRequest request) throws org.apache.tomcat.websocket.AuthenticationException {
+
+        String token = groupOrdersService.resolveToken(request);
+
+        if (Boolean.TRUE.equals(jwtTokenInterface.validateToken(token).getBody())) {
+            try {
+                orderStatusService.readyForDelivery(orderId);
+                return new ResponseEntity<>(HttpStatus.OK);
+            } catch (Exception e) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("fail_message", "updateStatusToReadyForDelivery Not found GroupOrder with orderId");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+        } else {
+            throw new org.apache.tomcat.websocket.AuthenticationException("User is not authenticated to submitted order To Restaurant!");
+        }
+    }
+
+    @PutMapping("/onDelivered/{orderId}")
+    public ResponseEntity updateStatusToOnDelivery(@PathVariable("orderId") String orderId,HttpServletRequest request) throws org.apache.tomcat.websocket.AuthenticationException {
+
+        String token = groupOrdersService.resolveToken(request);
+
+        if (Boolean.TRUE.equals(jwtTokenInterface.validateToken(token).getBody())) {
+            try {
+                orderStatusService.onDelivery(orderId);
+                return new ResponseEntity<>(HttpStatus.OK);
+            } catch (Exception e) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("fail_message", "updateStatusToOnDelivery Not found GroupOrder with orderId");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+        } else {
+            throw new org.apache.tomcat.websocket.AuthenticationException("User is not authenticated to submitted order To Restaurant!");
+        }
+    }
+
+    @PutMapping("/delivered/{orderId}")
+    public ResponseEntity updateStatusToDelivered(@PathVariable("orderId") String orderId,HttpServletRequest request) throws org.apache.tomcat.websocket.AuthenticationException {
+
+        String token = groupOrdersService.resolveToken(request);
+
+        if (Boolean.TRUE.equals(jwtTokenInterface.validateToken(token).getBody())) {
+            try {
+                orderStatusService.delivered(orderId);
+                return new ResponseEntity<>(HttpStatus.OK);
+            } catch (Exception e) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("fail_message", "updateStatusToReadyForDelivery Not found GroupOrder with orderId");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+        } else {
+            throw new org.apache.tomcat.websocket.AuthenticationException("User is not authenticated to submitted order To Restaurant!");
+        }
     }
 
 }
