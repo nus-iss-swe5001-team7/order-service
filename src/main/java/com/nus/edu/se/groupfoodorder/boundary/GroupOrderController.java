@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nus.edu.se.exception.AuthenticationException;
 import com.nus.edu.se.exception.DataNotFoundException;
+import com.nus.edu.se.exception.ServiceNotAvailableException;
 import com.nus.edu.se.groupfoodorder.dao.GroupOrderRepository;
 import com.nus.edu.se.groupfoodorder.dto.*;
 import com.nus.edu.se.groupfoodorder.model.GroupFoodOrder;
@@ -52,21 +53,17 @@ public class GroupOrderController {
     private OrderDetailMapper orderDetailMapper;
     @Autowired
     private OrderMapper orderMapper;
-
     @Autowired
     private RestaurantService restaurantService;
-
     @Autowired
     private UsersService usersService;
     @Autowired
     private GroupOrderFilterStrategyFactory strategyFactory;
-//    private static final String SERVICE_NAME = "CreateGroupFoodOrder";
     @Autowired
     JwtTokenInterface jwtTokenInterface;
 
     @PostMapping("/groupFoodOrder")
-//    @CircuitBreaker(name = SERVICE_NAME, fallbackMethod = "fallbackCreateGroupFoodOrder")
-    public ResponseEntity<OrderResponse> createGroupFoodOrder(@RequestBody OrderRequest orderRequest, HttpServletRequest request) throws JsonProcessingException, AuthenticationException {
+    public ResponseEntity<OrderResponse> createGroupFoodOrder(@RequestBody OrderRequest orderRequest, HttpServletRequest request) throws JsonProcessingException, AuthenticationException, ServiceNotAvailableException{
         String token = groupOrdersService.resolveToken(request);
         if (Boolean.TRUE.equals(jwtTokenInterface.validateToken(token).getBody())) {
 
@@ -86,30 +83,27 @@ public class GroupOrderController {
             UsersResponse usersResponse = usersService.getUserById(UUID.fromString(orderRequest.getUserId()), token);
 
             // call restaurant-service
-            RestaurantResponse restaurantResponse = restaurantService.getRestaurantById(orderRequest.getRestaurantId(), token);
-            Order order = new Order();
-            order.setRestaurantId(restaurantResponse.getId());
-            order.setGroupFoodOrder(groupFoodOrder);
-            order.setCreatedTime(new Date());
-            order.setUserId(usersResponse.getUserId());
-            order.setDeliveryFee(orderRequest.getDeliveryFee());
-            order = orderRepository.save(order);
+            try {
+                RestaurantResponse restaurantResponse = restaurantService.getRestaurantById(orderRequest.getRestaurantId(), token);
 
+                Order order = new Order();
+                order.setRestaurantId(restaurantResponse.getId());
+                order.setGroupFoodOrder(groupFoodOrder);
+                order.setCreatedTime(new Date());
+                order.setUserId(usersResponse.getUserId());
+                order.setDeliveryFee(orderRequest.getDeliveryFee());
+                order = orderRepository.save(order);
 
-            List<OrderDetail> orderDetailArray = saveOrderDetails(orderRequest.getOrderDetails(), order, token);
+                List<OrderDetail> orderDetailArray = saveOrderDetails(orderRequest.getOrderDetails(), order, token);
 
-            return ResponseEntity.ok(orderMapper.fromOrderToOrderDTO(order, orderDetailArray, token));
+                return ResponseEntity.ok(orderMapper.fromOrderToOrderDTO(order, orderDetailArray, token));
+            }catch (ServiceNotAvailableException e) {
+                throw new ServiceNotAvailableException("Restaurant service is currently unavailable. Please try again later.", e);
+            }
         } else {
             throw new AuthenticationException("User is not authenticated to createGroupFoodOrder!");
         }
     }
-
-//    public ResponseEntity<OrderResponse> fallbackCreateGroupFoodOrder(OrderRequest orderRequest, Throwable throwable) {
-//        // Handle the fallback logic here
-//        // For example, return a default response or an error message
-//        OrderResponse fallbackResponse = new OrderResponse();
-//        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(fallbackResponse);
-//    }
 
     private List<OrderDetail> saveOrderDetails(String jsonString, Order order, String token) throws AuthenticationException {
         if (Boolean.TRUE.equals(jwtTokenInterface.validateToken(token).getBody())) {

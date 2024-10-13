@@ -4,12 +4,9 @@ import com.nus.edu.se.menu.dto.MenuResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-
-import java.util.Map;
 @Service
 @Slf4j
 @Transactional
@@ -20,8 +17,6 @@ public class MenuService {
         MenuResponse menuResponse = webClientBuilder.build().get()
                 .uri("http://restaurant-service/menuAPI/getMenuById/{id}", menuId)
                 .header("Authorization", "Bearer " + token)
-//                .uri("http://localhost:8090/restaurants/getRestaurantById/{id}", restaurantById)
-//                .uri(uriBuilder -> uriBuilder.path("http://localhost:8090/restaurants/getRestaurantById").queryParam("id",restaurantById).build())
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError(), response -> {
                     return Mono.error(new RuntimeException("MenuService getMenuById Client error: " + response.statusCode()));
