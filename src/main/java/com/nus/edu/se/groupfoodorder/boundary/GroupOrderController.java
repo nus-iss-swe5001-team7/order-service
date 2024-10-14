@@ -142,8 +142,6 @@ public class GroupOrderController {
 
     @GetMapping("/getAllPendingJoinGroupOrders")
     public ResponseEntity<List<GroupFoodOrderList>> getAllGroupFoodOrder(@RequestParam UUID userId, HttpServletRequest request) throws org.apache.tomcat.websocket.AuthenticationException {
-        System.out.println("getAllPendingJoinGroupOrders: Start");
-
         String token = groupOrdersService.resolveToken(request);
 
         if (Boolean.TRUE.equals(jwtTokenInterface.validateToken(token).getBody())) {
@@ -165,7 +163,6 @@ public class GroupOrderController {
 
     @GetMapping("/groupOrders")
     public List<?> findAllByUserId(@RequestParam(value = "parameter") String userId, HttpServletRequest request) throws org.apache.tomcat.websocket.AuthenticationException {
-
         String token = groupOrdersService.resolveToken(request);
 
         UUID userUUID = UUID.fromString(userId);
