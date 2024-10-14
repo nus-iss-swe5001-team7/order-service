@@ -1,6 +1,8 @@
 package com.nus.edu.se.groupfoodorder.service;
 
+import com.nus.edu.se.exception.AuthenticationException;
 import com.nus.edu.se.exception.DataNotFoundException;
+import com.nus.edu.se.exception.ServiceNotAvailableException;
 import com.nus.edu.se.groupfoodorder.dao.GroupOrderRepository;
 import com.nus.edu.se.groupfoodorder.dto.GroupFoodOrderList;
 import com.nus.edu.se.groupfoodorder.dto.GroupFoodOrderResponse;
@@ -21,7 +23,6 @@ import com.nus.edu.se.user.dto.UsersResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -64,15 +65,23 @@ public class GroupOrdersService {
     @Autowired
     JwtTokenInterface jwtTokenInterface;
 
+    public void setGroupOrderMapper(GroupOrderMapper mapper) {
+        this.groupOrderMapper = mapper;
+    }
+
+    public void setOrderDetailMapper(OrderDetailMapper mapper) {
+        this.orderDetailMapper = mapper;
+    }
+
     public boolean groupFoodOrderNotValidToJoin(GroupFoodOrder groupFoodOrder) {
         return groupFoodOrder.getStatus() == GroupFoodOrder.Status.SUBMITTED_TO_RESTAURANT || (groupFoodOrder.getStatus() == GroupFoodOrder.Status.ORDER_CANCEL);
     }
 
-   public List<GroupFoodOrderList> getAllGroupOrders(String token) throws AuthenticationException{
+   public List<GroupFoodOrderList> getAllGroupOrders(String token) throws AuthenticationException, ServiceNotAvailableException{
         return getAllGroupOrders(null, token);
    }
 
-    public List<GroupFoodOrderList> getAllGroupOrders(String userId, String token) throws AuthenticationException{
+    public List<GroupFoodOrderList> getAllGroupOrders(String userId, String token) throws AuthenticationException, ServiceNotAvailableException{
         if (Boolean.TRUE.equals(jwtTokenInterface.validateToken(token).getBody())) {
             List<GroupFoodOrder> groupFoodOrders = groupOrderRepository.findAll();
             List<GroupFoodOrderList> groupFoodOrderList = new ArrayList<>();
@@ -92,15 +101,20 @@ public class GroupOrdersService {
                     Order firstOrder = orderList.get(0);
 
                     // find the restaurant that assocaite to the order
-                    String restaurantId = firstOrder.getRestaurantId();
-                    RestaurantResponse restaurant = restaurantService.getRestaurantById(restaurantId, token);
+                    try {
+                        String restaurantId = firstOrder.getRestaurantId();
 
-                    if (restaurant != null) {
-                        dto.setRestaurantId(restaurant.getId());
-                        dto.setRestaurantName(restaurant.getRestaurantName());
-                        dto.setLocation(restaurant.getLocation());
-                        dto.setRating(String.valueOf(restaurant.getRating()));
-                        dto.setImgUrl(restaurant.getRestaurantImgURL());
+                        RestaurantResponse restaurant = restaurantService.getRestaurantById(restaurantId, token);
+
+                        if (restaurant != null) {
+                            dto.setRestaurantId(restaurant.getId());
+                            dto.setRestaurantName(restaurant.getRestaurantName());
+                            dto.setLocation(restaurant.getLocation());
+                            dto.setRating(String.valueOf(restaurant.getRating()));
+                            dto.setImgUrl(restaurant.getRestaurantImgURL());
+                        }
+                    } catch (ServiceNotAvailableException e) {
+                        throw new ServiceNotAvailableException("Restaurant service is currently unavailable. Please try again later.", e);
                     }
 
                     if (!userIds.contains(userId)) {
@@ -135,7 +149,6 @@ public class GroupOrdersService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteOrder(String orderId)  {
         Order order = orderRepository.findById(UUID.fromString(orderId)).orElseThrow(() -> new DataNotFoundException("Order Not Found."));
-        //orderDetailsRepository.deleteAll(orderDetailsRepository.findOrderDetailsByOrderItemId(UUID.fromString(orderId)));
         orderDetailsRepository.deleteAll(orderDetailsRepository.findOrderDetailsByOrder(order));
         orderRepository.deleteById(UUID.fromString(orderId));
     }
@@ -150,41 +163,43 @@ public class GroupOrdersService {
                 GroupFoodOrder groupFoodOrder = order.getGroupFoodOrder();
 
                 List<String> orderListInGroupFoodOrder = orderRepository.findOrderByGroupFoodOrderOrderByCreatedTimeAsc(groupFoodOrder).stream().map(v -> v.getId().toString()).toList();
+                try {
+                    RestaurantResponse restaurant = restaurantService.getRestaurantById(order.getRestaurantId(), token);
 
-                RestaurantResponse restaurant = restaurantService.getRestaurantById(order.getRestaurantId(), token);
+                    // convert to OrderItemDto
+                    GroupFoodOrderResponse groupFoodOrderDTO = groupOrderMapper.fromGroupFoodOrderToGroupFoodOrderDTO(order,
+                            groupFoodOrder, restaurant);
 
-                // convert to OrderItemDto
-                GroupFoodOrderResponse groupFoodOrderDTO = groupOrderMapper.fromGroupFoodOrderToGroupFoodOrderDTO(order,
-                        groupFoodOrder, restaurant);
+                    List<OrderDetail> orderDetailList = orderDetailsRepository.findOrderDetailsByOrder(order);
+                    List<OrderDetailDTO> orderDetailDtoList = new ArrayList<>();
 
-                List<OrderDetail> orderDetailList = orderDetailsRepository.findOrderDetailsByOrder(order);
-                List<OrderDetailDTO> orderDetailDtoList = new ArrayList<>();
-
-                float totalPrice = 0;
-                for (OrderDetail orderDetail : orderDetailList) {
-                    if (orderDetail != null) {
-                        MenuResponse menu = menuService.findById(orderDetail.getMenuId(), token);
-//                        Menu menu = orderDetail.getMenu();
-                        float totalPriceOrderDetail = menu.getMenuPrice() * orderDetail.getQuantity();
-                        // System.out.println("totalPriceOrderDetail: " + totalPriceOrderDetail);
-                        totalPrice = totalPrice + totalPriceOrderDetail;
-                        // convert to OrderDetailsDto
-                        OrderDetailDTO orderDetailDto = orderDetailMapper.fromOrderDetailToOrderDetailDTO(orderDetail,
-                                menu);
-                        orderDetailDtoList.add(orderDetailDto);
+                    float totalPrice = 0;
+                    for (OrderDetail orderDetail : orderDetailList) {
+                        if (orderDetail != null) {
+                            MenuResponse menu = menuService.findById(orderDetail.getMenuId(), token);
+                            float totalPriceOrderDetail = menu.getMenuPrice() * orderDetail.getQuantity();
+                            // System.out.println("totalPriceOrderDetail: " + totalPriceOrderDetail);
+                            totalPrice = totalPrice + totalPriceOrderDetail;
+                            // convert to OrderDetailsDto
+                            OrderDetailDTO orderDetailDto = orderDetailMapper.fromOrderDetailToOrderDetailDTO(orderDetail,
+                                    menu);
+                            orderDetailDtoList.add(orderDetailDto);
+                        }
+                        // System.out.println("totalPrice: " + totalPrice);
+                        groupFoodOrderDTO.setTotalPrice(totalPrice);
                     }
-                    // System.out.println("totalPrice: " + totalPrice);
-                    groupFoodOrderDTO.setTotalPrice(totalPrice);
-                }
 
-                // System.out.println("groupFoodOrderDTO setTotalPrice: " +
-                // groupFoodOrderDTO.getTotalPrice());
-                groupFoodOrderDTO.setOrderDetailDtoList(orderDetailDtoList);
-                groupFoodOrderDTO.setOrderIdsList(orderListInGroupFoodOrder);
-                groupFoodOrderDTO.setDeliveryLocation(groupFoodOrder.getDeliveryLocation());
-                groupFoodOrderDTO.setDeliveryFee(order.getDeliveryFee());
-                groupFoodOrderDTO.setRestaurantName(restaurant.getRestaurantName());
-                orderDtoList.add(groupFoodOrderDTO);
+                    // System.out.println("groupFoodOrderDTO setTotalPrice: " +
+                    // groupFoodOrderDTO.getTotalPrice());
+                    groupFoodOrderDTO.setOrderDetailDtoList(orderDetailDtoList);
+                    groupFoodOrderDTO.setOrderIdsList(orderListInGroupFoodOrder);
+                    groupFoodOrderDTO.setDeliveryLocation(groupFoodOrder.getDeliveryLocation());
+                    groupFoodOrderDTO.setDeliveryFee(order.getDeliveryFee());
+                    groupFoodOrderDTO.setRestaurantName(restaurant.getRestaurantName());
+                    orderDtoList.add(groupFoodOrderDTO);
+                } catch (ServiceNotAvailableException e) {
+                    throw new ServiceNotAvailableException("Restaurant service is currently unavailable. Please try again later.", e);
+                }
             }
         }
 
@@ -208,8 +223,6 @@ public class GroupOrdersService {
         if (!orderList.isEmpty()) {
             Order firstOrder = orderList.get(0);
             String restaurantId = firstOrder.getRestaurantId();
-            RestaurantResponse restaurant = restaurantService.getRestaurantById(restaurantId, token);
-
             jointGroupFoodOrder.setRestaurantId(restaurantId);
             jointGroupFoodOrder.setMainOrderId(firstOrder.getId().toString());
             jointGroupFoodOrder.setNumberOfUsers(orderList.size());

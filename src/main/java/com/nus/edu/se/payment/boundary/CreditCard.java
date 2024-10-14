@@ -1,6 +1,6 @@
 package com.nus.edu.se.payment.boundary;
 
-class CreditCard implements CCPaymentInterface {
+public class CreditCard implements CCPaymentInterface {
 	
     @Override
     public void checkCreditCardCredentials() {

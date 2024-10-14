@@ -1,6 +1,6 @@
 package com.nus.edu.se.payment.boundary;
 
-class PayLah implements PayLahPaymentInterface {
+public class PayLah implements PayLahPaymentInterface {
     @Override
     public void checkPhoneNumForPayLah() {
         
