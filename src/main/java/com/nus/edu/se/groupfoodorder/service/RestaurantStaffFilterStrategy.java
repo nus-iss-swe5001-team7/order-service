@@ -10,15 +10,9 @@ public class RestaurantStaffFilterStrategy implements GroupOrderFilterStrategy {
     @Override
     public List<GroupFoodOrderList> filter(List<GroupFoodOrderList> orders, String restaurantId) {
 
-        UUID restaurantUuid;
-        try {
-            restaurantUuid = UUID.fromString(restaurantId);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid UUID format", e);
-        }
         return orders.stream()
                 .filter(order -> order != null &&
-                        order.getRestaurantId() != null && order.getRestaurantId().equals(restaurantUuid) &&
+                        order.getRestaurantId() != null && order.getRestaurantId().equals(restaurantId) &&
                         ("SUBMITTED_TO_RESTAURANT".equals(order.getOrderStatus()) || "KITCHEN_PREPARING".equals(order.getOrderStatus())))
                 .collect(Collectors.toList());
     }

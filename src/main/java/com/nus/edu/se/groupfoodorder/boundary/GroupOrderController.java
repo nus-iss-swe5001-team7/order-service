@@ -184,16 +184,42 @@ public class GroupOrderController {
     @GetMapping("/getOrdersForDeliveryStaff")
     public ResponseEntity<List<GroupFoodOrderList>> getOrdersForDeliveryStaff(@RequestParam UUID userId, @RequestParam String location, HttpServletRequest request) throws AuthenticationException {
         String token = groupOrdersService.resolveToken(request);
-        UserRole userRole = usersService.getUserRoleByUserId(userId, token);
 
-        // Ensure the user is authorized as delivery staff before proceeding
-        if (!UserRole.DELIVERY_STAFF.equals(userRole)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        if (Boolean.TRUE.equals(jwtTokenInterface.validateToken(token).getBody())) {
+            UserRole userRole = usersService.getUserRoleByUserId(userId, token);
+
+            // Ensure the user is authorized as delivery staff before proceeding
+            if (!UserRole.DELIVERY_STAFF.equals(userRole)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            } else {
+                List<GroupFoodOrderList> allOrders = groupOrdersService.getAllGroupOrders(token);
+                GroupOrderFilterStrategy strategy = strategyFactory.getStrategy(UserRole.DELIVERY_STAFF);
+                List<GroupFoodOrderList> filteredOrders = strategy.filter(allOrders, location);
+                return ResponseEntity.ok(filteredOrders);
+            }
         } else {
-            List<GroupFoodOrderList> allOrders = groupOrdersService.getAllGroupOrders(token);
-            GroupOrderFilterStrategy strategy = strategyFactory.getStrategy(UserRole.DELIVERY_STAFF);
-            List<GroupFoodOrderList> filteredOrders = strategy.filter(allOrders, location);
-            return ResponseEntity.ok(filteredOrders);
+            throw new AuthenticationException("User is not authenticated to getAllPendingJoinGroupOrders!");
+        }
+    }
+
+    @GetMapping("/getOrdersForRestaurantStaff")
+    public ResponseEntity<List<GroupFoodOrderList>> getOrdersForRestaurantStaff(@RequestParam UUID userId, @RequestParam String restaurantId, HttpServletRequest request) throws AuthenticationException {
+        String token = groupOrdersService.resolveToken(request);
+
+        if (Boolean.TRUE.equals(jwtTokenInterface.validateToken(token).getBody())) {
+            UserRole userRole = usersService.getUserRoleByUserId(userId, token);
+
+            // Verify the user is authorized as restaurant staff before proceeding
+            if (!UserRole.RESTAURANT_STAFF.equals(userRole)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            } else {
+                List<GroupFoodOrderList> allOrders = groupOrdersService.getAllGroupOrders(token);
+                GroupOrderFilterStrategy strategy = strategyFactory.getStrategy(UserRole.RESTAURANT_STAFF);
+                List<GroupFoodOrderList> filteredOrders = strategy.filter(allOrders, restaurantId);
+                return ResponseEntity.ok(filteredOrders);
+            }
+        } else {
+            throw new AuthenticationException("User is not authenticated to getAllPendingJoinGroupOrders!");
         }
     }
 
