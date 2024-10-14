@@ -97,7 +97,7 @@ public class GroupOrdersService {
                 // find the order that associate to the group order
                 List<Order> orderList = orderRepository.findOrderByGroupFoodOrderOrderByCreatedTimeAsc(order);
                 if (!orderList.isEmpty()) { // to handle inconsistent of group_food_orders and order_items due to any failure
-                    List<String> userIds = orderList.stream().map(orderItem -> orderItem.getId().toString()).toList();
+                    List<String> userIds = orderList.stream().map(orderItem -> orderItem.getUserId().toString()).toList();
                     Order firstOrder = orderList.get(0);
 
                     // find the restaurant that assocaite to the order

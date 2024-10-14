@@ -40,6 +40,8 @@ public class UsersService {
 
         if (currentUser!=null)
         {
+            System.out.println("userID:" + userID);
+
             System.out.println("found user");
             return switch (currentUser.getRole()) {
                 case "customer" -> UserRole.CUSTOMER;
