@@ -1,6 +1,6 @@
 package com.nus.edu.se.payment.boundary;
 
-class PayNowAdapter implements PaymentGatewayInterface {
+public class PayNowAdapter implements PaymentGatewayInterface {
    private final PayNowPaymentInterface payNowPaymentInterface;
 
     public PayNowAdapter(PayNowPaymentInterface payNowPaymentInterface) {

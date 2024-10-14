@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nus.edu.se.exception.AuthenticationException;
 import com.nus.edu.se.exception.DataNotFoundException;
+import com.nus.edu.se.exception.ServiceNotAvailableException;
 import com.nus.edu.se.groupfoodorder.dao.GroupOrderRepository;
 import com.nus.edu.se.groupfoodorder.dto.*;
 import com.nus.edu.se.groupfoodorder.model.GroupFoodOrder;
@@ -50,7 +51,6 @@ public class GroupOrderController {
     private OrderDetailMapper orderDetailMapper;
     @Autowired
     private OrderMapper orderMapper;
-
     @Autowired
     private RestaurantService restaurantService;
     @Autowired
@@ -59,13 +59,11 @@ public class GroupOrderController {
     private UsersService usersService;
     @Autowired
     private GroupOrderFilterStrategyFactory strategyFactory;
-//    private static final String SERVICE_NAME = "CreateGroupFoodOrder";
     @Autowired
     JwtTokenInterface jwtTokenInterface;
 
     @PostMapping("/groupFoodOrder")
-//    @CircuitBreaker(name = SERVICE_NAME, fallbackMethod = "fallbackCreateGroupFoodOrder")
-    public ResponseEntity<OrderResponse> createGroupFoodOrder(@RequestBody OrderRequest orderRequest, HttpServletRequest request) throws JsonProcessingException, org.apache.tomcat.websocket.AuthenticationException {
+    public ResponseEntity<OrderResponse> createGroupFoodOrder(@RequestBody OrderRequest orderRequest, HttpServletRequest request) throws JsonProcessingException, AuthenticationException, ServiceNotAvailableException{
         String token = groupOrdersService.resolveToken(request);
         if (Boolean.TRUE.equals(jwtTokenInterface.validateToken(token).getBody())) {
 
@@ -85,32 +83,29 @@ public class GroupOrderController {
             UsersResponse usersResponse = usersService.getUserById(UUID.fromString(orderRequest.getUserId()), token);
 
             // call restaurant-service
-            RestaurantResponse restaurantResponse = restaurantService.getRestaurantById(orderRequest.getRestaurantId(), token);
-            Order order = new Order();
-            order.setRestaurantId(restaurantResponse.getId());
-            order.setGroupFoodOrder(groupFoodOrder);
-            order.setCreatedTime(new Date());
-            order.setUserId(usersResponse.getUserId());
-            order.setDeliveryFee(orderRequest.getDeliveryFee());
-            order = orderRepository.save(order);
+            try {
+                RestaurantResponse restaurantResponse = restaurantService.getRestaurantById(orderRequest.getRestaurantId(), token);
 
+                Order order = new Order();
+                order.setRestaurantId(restaurantResponse.getId());
+                order.setGroupFoodOrder(groupFoodOrder);
+                order.setCreatedTime(new Date());
+                order.setUserId(usersResponse.getUserId());
+                order.setDeliveryFee(orderRequest.getDeliveryFee());
+                order = orderRepository.save(order);
 
-            List<OrderDetail> orderDetailArray = saveOrderDetails(orderRequest.getOrderDetails(), order, token);
+                List<OrderDetail> orderDetailArray = saveOrderDetails(orderRequest.getOrderDetails(), order, token);
 
-            return ResponseEntity.ok(orderMapper.fromOrderToOrderDTO(order, orderDetailArray, token));
+                return ResponseEntity.ok(orderMapper.fromOrderToOrderDTO(order, orderDetailArray, token));
+            }catch (ServiceNotAvailableException e) {
+                throw new ServiceNotAvailableException("Restaurant service is currently unavailable. Please try again later.", e);
+            }
         } else {
-            throw new org.apache.tomcat.websocket.AuthenticationException("User is not authenticated to createGroupFoodOrder!");
+            throw new AuthenticationException("User is not authenticated to createGroupFoodOrder!");
         }
     }
 
-//    public ResponseEntity<OrderResponse> fallbackCreateGroupFoodOrder(OrderRequest orderRequest, Throwable throwable) {
-//        // Handle the fallback logic here
-//        // For example, return a default response or an error message
-//        OrderResponse fallbackResponse = new OrderResponse();
-//        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(fallbackResponse);
-//    }
-
-    private List<OrderDetail> saveOrderDetails(String jsonString, Order order, String token) throws org.apache.tomcat.websocket.AuthenticationException {
+    private List<OrderDetail> saveOrderDetails(String jsonString, Order order, String token) throws AuthenticationException {
         if (Boolean.TRUE.equals(jwtTokenInterface.validateToken(token).getBody())) {
 
             if (jsonString == null) {
@@ -134,12 +129,12 @@ public class GroupOrderController {
                 throw new RuntimeException(e);
             }
         } else {
-            throw new org.apache.tomcat.websocket.AuthenticationException("User is not authenticated to saveOrderDetails!");
+            throw new AuthenticationException("User is not authenticated to saveOrderDetails!");
         }
     }
 
     @GetMapping("/getAllGroupOrders")
-    public ResponseEntity<?> getAllGroupOrders(HttpServletRequest request) throws org.apache.tomcat.websocket.AuthenticationException {
+    public ResponseEntity<?> getAllGroupOrders(HttpServletRequest request) throws AuthenticationException {
         String token = groupOrdersService.resolveToken(request);
         List<GroupFoodOrderList> orders = groupOrdersService.getAllGroupOrders(token);
         return ResponseEntity.ok(orders);
@@ -164,7 +159,7 @@ public class GroupOrderController {
             List<GroupFoodOrderList> filteredOrders = strategy.filter(allOrders, null);
             return ResponseEntity.ok(filteredOrders);
         } else {
-            throw new org.apache.tomcat.websocket.AuthenticationException("User is not authenticated to getAllPendingJoinGroupOrders!");
+            throw new AuthenticationException("User is not authenticated to getAllPendingJoinGroupOrders!");
         }
     }
 
@@ -186,6 +181,23 @@ public class GroupOrderController {
         String token = groupOrdersService.resolveToken(request);
 
         return groupOrdersService.getInfoForGroupOrder(groupOrderId, token);
+    }
+
+
+    @GetMapping("/getOrdersForDeliveryStaff")
+    public ResponseEntity<List<GroupFoodOrderList>> getOrdersForDeliveryStaff(@RequestParam UUID userId, @RequestParam String location, HttpServletRequest request) throws AuthenticationException {
+        String token = groupOrdersService.resolveToken(request);
+        UserRole userRole = usersService.getUserRoleByUserId(userId, token);
+
+        // Ensure the user is authorized as delivery staff before proceeding
+        if (!UserRole.DELIVERY_STAFF.equals(userRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        } else {
+            List<GroupFoodOrderList> allOrders = groupOrdersService.getAllGroupOrders(token);
+            GroupOrderFilterStrategy strategy = strategyFactory.getStrategy(UserRole.DELIVERY_STAFF);
+            List<GroupFoodOrderList> filteredOrders = strategy.filter(allOrders, location);
+            return ResponseEntity.ok(filteredOrders);
+        }
     }
 
     @PutMapping("/submittedToRestaurant/{orderId}")
