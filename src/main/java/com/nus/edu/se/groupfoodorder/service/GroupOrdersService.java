@@ -65,6 +65,14 @@ public class GroupOrdersService {
     @Autowired
     JwtTokenInterface jwtTokenInterface;
 
+    public void setGroupOrderMapper(GroupOrderMapper mapper) {
+        this.groupOrderMapper = mapper;
+    }
+
+    public void setOrderDetailMapper(OrderDetailMapper mapper) {
+        this.orderDetailMapper = mapper;
+    }
+
     public boolean groupFoodOrderNotValidToJoin(GroupFoodOrder groupFoodOrder) {
         return groupFoodOrder.getStatus() == GroupFoodOrder.Status.SUBMITTED_TO_RESTAURANT || (groupFoodOrder.getStatus() == GroupFoodOrder.Status.ORDER_CANCEL);
     }

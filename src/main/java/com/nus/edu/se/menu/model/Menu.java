@@ -4,13 +4,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.UuidGenerator;
-import java.util.UUID;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
 
@@ -24,13 +22,13 @@ public class Menu {
     @Id
     @UuidGenerator
     @Column(name = "menu_id", nullable = false)
-    private UUID id;
+    private String id;
 
     @Column(name = "menu_name", nullable = false)
     private String menuName;
 
     @Column(name = "restaurant_id", nullable = false)
-    private UUID restaurantId;
+    private String restaurantId;
 
     @Column(name = "description")
     private String description;
