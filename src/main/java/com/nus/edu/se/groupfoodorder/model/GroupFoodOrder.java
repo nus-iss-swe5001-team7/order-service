@@ -1,7 +1,6 @@
 package com.nus.edu.se.groupfoodorder.model;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Date;
@@ -10,8 +9,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "group_food_orders")
 public class GroupFoodOrder {
-
-    public enum Status {PENDING_USER_JOIN, ORDER_CANCEL, SUBMITTED_TO_RESTAURANT, KITCHEN_PREPARING, READY_FOR_DELIVERY, ON_DELIVERY, DELIVERED};
 
     @Id
     @UuidGenerator
@@ -32,7 +29,7 @@ public class GroupFoodOrder {
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Status status = Status.PENDING_USER_JOIN;
+    private StatusEnum status = StatusEnum.PENDING_USER_JOIN;
 
     public GroupFoodOrder() {
     }
@@ -61,11 +58,11 @@ public class GroupFoodOrder {
         this.groupOrderDeliveryTime = groupOrderDeliveryTime;
     }
 
-    public Status getStatus() {
+    public StatusEnum getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(StatusEnum status) {
         this.status = status;
     }
 

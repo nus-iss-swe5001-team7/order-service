@@ -6,6 +6,7 @@ import com.nus.edu.se.groupfoodorder.dto.GroupFoodOrderList;
 import com.nus.edu.se.groupfoodorder.dto.GroupFoodOrderResponse;
 import com.nus.edu.se.groupfoodorder.dto.JointGroupFoodOrderDTO;
 import com.nus.edu.se.groupfoodorder.model.GroupFoodOrder;
+import com.nus.edu.se.groupfoodorder.model.StatusEnum;
 import com.nus.edu.se.mapper.GroupOrderMapper;
 import com.nus.edu.se.menu.dto.MenuResponse;
 import com.nus.edu.se.menu.service.MenuService;
@@ -24,15 +25,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+
 @Service
 @Slf4j
 @Transactional
@@ -65,7 +67,7 @@ public class GroupOrdersService {
     JwtTokenInterface jwtTokenInterface;
 
     public boolean groupFoodOrderNotValidToJoin(GroupFoodOrder groupFoodOrder) {
-        return groupFoodOrder.getStatus() == GroupFoodOrder.Status.SUBMITTED_TO_RESTAURANT || (groupFoodOrder.getStatus() == GroupFoodOrder.Status.ORDER_CANCEL);
+        return groupFoodOrder.getStatus() == StatusEnum.SUBMITTED_TO_RESTAURANT || (groupFoodOrder.getStatus() == StatusEnum.ORDER_CANCEL);
     }
 
    public List<GroupFoodOrderList> getAllGroupOrders(String token) throws AuthenticationException{
@@ -116,7 +118,7 @@ public class GroupOrdersService {
     }
 
     @Transactional
-    public GroupFoodOrder updateStatus(String orderId, GroupFoodOrder.Status status) {
+    public GroupFoodOrder updateStatus(String orderId, StatusEnum status) {
         UUID orderUUID = UUID.fromString(orderId);
         GroupFoodOrder groupFoodOrder = new GroupFoodOrder();
         Optional<GroupFoodOrder> groupOrder = groupOrderRepository.findById(orderUUID);
@@ -220,5 +222,24 @@ public class GroupOrdersService {
         jointGroupFoodOrder.setGroupOrderDeliveryFee(order.getDeliveryFee());
 
         return ResponseEntity.ok(jointGroupFoodOrder);
+    }
+
+    @Scheduled(fixedRate = 10000)
+    public void processOrderAfterTenMinutes() {
+        List<GroupFoodOrder> groupFoodOrdersPendingToJoin = groupOrderRepository.findGroupFoodOrderByStatus(StatusEnum.PENDING_USER_JOIN);
+
+        for (GroupFoodOrder groupFoodOrderPendingToJoin : groupFoodOrdersPendingToJoin) {
+            Date groupFoodOrderPendingToJoinCreatedDate = groupFoodOrderPendingToJoin.getGroupOrderCreateTime();
+            if (groupFoodOrderPendingToJoinCreatedDate != null) {
+                LocalDateTime groupFoodOrderPendingToJoinCreatedTime = groupFoodOrderPendingToJoinCreatedDate.toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime();
+                if (groupFoodOrderPendingToJoinCreatedTime.plusMinutes(10).isBefore(LocalDateTime.now())) {
+                    groupFoodOrderPendingToJoin.setStatus(StatusEnum.SUBMITTED_TO_RESTAURANT);
+                }
+            } else {
+                System.out.println("Group order" + groupFoodOrderPendingToJoin.getId() + " hasn't been paid.");
+            }
+        }
     }
 }
