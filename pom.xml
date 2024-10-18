@@ -51,12 +51,6 @@
 			<artifactId>spring-webflux</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.nus.edu.se</groupId>
-			<artifactId>user-service</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-netflix-eureka-server</artifactId>
 		</dependency>
