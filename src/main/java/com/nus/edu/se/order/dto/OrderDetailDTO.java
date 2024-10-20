@@ -23,7 +23,7 @@ public class OrderDetailDTO {
 
     private float price;
 
-    private String menuImageURL;
+    private String imgUrl;
 
     private String description;
 

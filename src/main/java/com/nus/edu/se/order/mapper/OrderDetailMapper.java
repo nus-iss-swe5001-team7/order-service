@@ -35,7 +35,7 @@ public class OrderDetailMapper {
                     orderDetailDTO.setName(menu.getMenuName());
                     orderDetailDTO.setQuantity(orderDetail.getQuantity());
                     orderDetailDTO.setDescription(menu.getDescription());
-                    orderDetailDTO.setMenuImageURL(menu.getMenuImageURL());
+                    orderDetailDTO.setImgUrl(menu.getMenuImageURL());
                     return orderDetailDTO;
                 })
                 .collect(Collectors.toList());
@@ -46,7 +46,7 @@ public class OrderDetailMapper {
 
         orderDetailDto.setQuantity(orderDetail.getQuantity());
         orderDetailDto.setName(menu.getMenuName());
-        orderDetailDto.setMenuImageURL(menu.getMenuImageURL());
+        orderDetailDto.setImgUrl(menu.getMenuImageURL());
         orderDetailDto.setDescription(menu.getDescription());
         orderDetailDto.setPrice(menu.getMenuPrice());
 

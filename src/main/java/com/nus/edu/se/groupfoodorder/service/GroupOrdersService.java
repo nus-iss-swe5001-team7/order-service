@@ -253,9 +253,14 @@ public class GroupOrdersService {
                 LocalDateTime groupFoodOrderPendingToJoinCreatedTime = groupFoodOrderPendingToJoinCreatedDate.toInstant()
                         .atZone(ZoneId.systemDefault())
                         .toLocalDateTime();
-                if (groupFoodOrderPendingToJoinCreatedTime.plusMinutes(1).isBefore(LocalDateTime.now())) {
+                if (groupFoodOrderPendingToJoinCreatedTime.plusMinutes(10).isBefore(LocalDateTime.now())) {
                     groupFoodOrderPendingToJoin.setStatus(StatusEnum.SUBMITTED_TO_RESTAURANT);
-                    notificationService.sendNotification(groupFoodOrderPendingToJoin, StatusEnum.SUBMITTED_TO_RESTAURANT);
+
+                    try {
+                        notificationService.sendNotification(groupFoodOrderPendingToJoin, StatusEnum.SUBMITTED_TO_RESTAURANT);
+                    } catch (Exception e) {
+                        System.err.println("Failed to send notification for order " + groupFoodOrderPendingToJoin.getId() + ": " + e.getMessage());
+                    }
                 }
             } else {
                 System.out.println("Group order" + groupFoodOrderPendingToJoin.getId() + " hasn't been paid.");
