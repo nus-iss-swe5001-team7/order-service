@@ -10,6 +10,9 @@ import com.nus.edu.se.groupfoodorder.model.StatusEnum;
 import com.nus.edu.se.mapper.GroupOrderMapper;
 import com.nus.edu.se.menu.dto.MenuResponse;
 import com.nus.edu.se.menu.service.MenuService;
+import com.nus.edu.se.notification.MessageRequest;
+import com.nus.edu.se.notification.NotificationInterface;
+import com.nus.edu.se.notification.NotificationService;
 import com.nus.edu.se.order.dao.OrderDetailRepository;
 import com.nus.edu.se.order.dao.OrderRepository;
 import com.nus.edu.se.order.dto.OrderDetailDTO;
@@ -65,6 +68,9 @@ public class GroupOrdersService {
 
     @Autowired
     JwtTokenInterface jwtTokenInterface;
+
+    @Autowired
+    NotificationService notificationService;
 
     public boolean groupFoodOrderNotValidToJoin(GroupFoodOrder groupFoodOrder) {
         return groupFoodOrder.getStatus() == StatusEnum.SUBMITTED_TO_RESTAURANT || (groupFoodOrder.getStatus() == StatusEnum.ORDER_CANCEL);
@@ -234,8 +240,9 @@ public class GroupOrdersService {
                 LocalDateTime groupFoodOrderPendingToJoinCreatedTime = groupFoodOrderPendingToJoinCreatedDate.toInstant()
                         .atZone(ZoneId.systemDefault())
                         .toLocalDateTime();
-                if (groupFoodOrderPendingToJoinCreatedTime.plusMinutes(10).isBefore(LocalDateTime.now())) {
+                if (groupFoodOrderPendingToJoinCreatedTime.plusMinutes(1).isBefore(LocalDateTime.now())) {
                     groupFoodOrderPendingToJoin.setStatus(StatusEnum.SUBMITTED_TO_RESTAURANT);
+                    notificationService.sendNotification(groupFoodOrderPendingToJoin, StatusEnum.SUBMITTED_TO_RESTAURANT);
                 }
             } else {
                 System.out.println("Group order" + groupFoodOrderPendingToJoin.getId() + " hasn't been paid.");
