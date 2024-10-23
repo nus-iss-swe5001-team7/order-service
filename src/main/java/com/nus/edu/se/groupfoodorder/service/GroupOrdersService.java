@@ -148,6 +148,12 @@ public class GroupOrdersService {
             groupFoodOrder.setId(orderUUID);
             groupFoodOrder.setStatus(status);
             groupFoodOrder = groupOrderRepository.saveAndFlush(groupFoodOrder);
+
+            try {
+                notificationService.sendNotification(groupFoodOrder, status);
+            } catch (Exception e) {
+                System.err.println("Failed to send notification for order " + groupFoodOrder.getId() + ": " + e.getMessage());
+            }
         } else {
             throw new RuntimeException("Not found GroupOrder with orderId = " + orderId);
         }
