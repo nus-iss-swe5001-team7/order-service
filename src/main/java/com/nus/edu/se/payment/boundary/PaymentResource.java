@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -153,7 +154,10 @@ public class PaymentResource {
                         throw new AuthenticationException("Group Order already submitted to restaurant, please join other group orders!");
                     } else {
                         order.setPaymentStatus(Order.PaymentStatus.COMPLETED);
-                        groupFoodOrder.setGroupOrderCreateTime(new Date());
+                        Date creationTime = groupFoodOrder.getGroupOrderCreateTime();
+                        if (creationTime == null) {
+                            groupFoodOrder.setGroupOrderCreateTime(new Date());
+                        }
                     }
                     break;
                 case "PROCESSING":
