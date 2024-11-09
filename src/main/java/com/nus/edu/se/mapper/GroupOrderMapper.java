@@ -27,6 +27,9 @@ public class GroupOrderMapper {
 //        RestaurantResponse restaurant = new RestaurantResponse();//order.getRestaurant();
         groupFoodOrderDTO.setLocation(restaurant.getLocation());
         groupFoodOrderDTO.setRating(restaurant.getRating());
+        groupFoodOrderDTO.setRestaurantAddress(restaurant.getRestaurantAddress());
+        groupFoodOrderDTO.setRestaurantLongitude(restaurant.getRestaurantLongitude());
+        groupFoodOrderDTO.setRestaurantLatitude(restaurant.getRestaurantLatitude());
 
         System.out.println("restaurant.getRating():"+restaurant.getRating());
         return groupFoodOrderDTO;

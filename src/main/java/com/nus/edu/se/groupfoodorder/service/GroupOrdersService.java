@@ -101,6 +101,10 @@ public class GroupOrdersService {
                 dto.setOrderTime(order.getGroupOrderCreateTime());
                 dto.setOrderStatus(order.getStatus().toString());
                 dto.setDeliveryLocation(order.getDeliveryLocation());
+                dto.setDeliveryAddress(order.getDeliveryAddress());
+                dto.setDeliveryLatitude(order.getDeliveryLatitude());
+                dto.setDeliveryLongitude(order.getDeliveryLongitude());
+
 
                 // find the order that associate to the group order
                 List<Order> orderList = orderRepository.findOrderByGroupFoodOrderOrderByCreatedTimeAsc(order);
@@ -120,6 +124,10 @@ public class GroupOrdersService {
                             dto.setLocation(restaurant.getLocation());
                             dto.setRating(String.valueOf(restaurant.getRating()));
                             dto.setImgUrl(restaurant.getRestaurantImgURL());
+                            dto.setRestaurantAddress(restaurant.getRestaurantAddress());
+                            dto.setRestaurantLatitude(restaurant.getRestaurantLatitude());
+                            dto.setRestaurantLongitude(restaurant.getRestaurantLongitude());
+
                         }
                     } catch (ServiceNotAvailableException e) {
                         throw new ServiceNotAvailableException("Restaurant service is currently unavailable. Please try again later.", e);
@@ -208,8 +216,12 @@ public class GroupOrdersService {
                     groupFoodOrderDTO.setOrderDetailDtoList(orderDetailDtoList);
                     groupFoodOrderDTO.setOrderIdsList(orderListInGroupFoodOrder);
                     groupFoodOrderDTO.setDeliveryLocation(groupFoodOrder.getDeliveryLocation());
+                    groupFoodOrderDTO.setDeliveryAddress(groupFoodOrder.getDeliveryAddress());
+                    groupFoodOrderDTO.setDeliveryLatitude(groupFoodOrder.getDeliveryLatitude());
+                    groupFoodOrderDTO.setDeliveryLongitude(groupFoodOrder.getDeliveryLongitude());
                     groupFoodOrderDTO.setDeliveryFee(order.getDeliveryFee());
                     groupFoodOrderDTO.setRestaurantName(restaurant.getRestaurantName());
+
                     orderDtoList.add(groupFoodOrderDTO);
                 } catch (ServiceNotAvailableException e) {
                     throw new ServiceNotAvailableException("Restaurant service is currently unavailable. Please try again later.", e);

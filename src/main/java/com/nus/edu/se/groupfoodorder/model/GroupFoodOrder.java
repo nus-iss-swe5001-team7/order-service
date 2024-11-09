@@ -24,6 +24,15 @@ public class GroupFoodOrder {
     @Column(name = "delivery_location")
     private String deliveryLocation;
 
+    @Column(name = "delivery_address")
+    private String deliveryAddress;
+
+    @Column(name = "delivery_latitude")
+    private String deliveryLatitude;
+
+    @Column(name = "delivery_longitude")
+    private String deliveryLongitude;
+
     @Column(name = "delivery_fee", nullable = false)
     private float deliveryFee;
 
@@ -72,6 +81,30 @@ public class GroupFoodOrder {
 
     public void setDeliveryLocation(String deliveryLocation) {
         this.deliveryLocation = deliveryLocation;
+    }
+
+    public String getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public void setDeliveryAddress(String deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
+    }
+
+    public String getDeliveryLatitude() {
+        return deliveryLatitude;
+    }
+
+    public void setDeliveryLatitude(String deliveryLatitude) {
+        this.deliveryLatitude = deliveryLatitude;
+    }
+
+    public String getDeliveryLongitude() {
+        return deliveryLongitude;
+    }
+
+    public void setDeliveryLongitude(String deliveryLongitude) {
+        this.deliveryLongitude = deliveryLongitude;
     }
 
     public float getDeliveryFee() {
