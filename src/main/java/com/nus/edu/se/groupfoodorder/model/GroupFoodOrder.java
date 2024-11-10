@@ -1,7 +1,6 @@
 package com.nus.edu.se.groupfoodorder.model;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Date;
@@ -10,8 +9,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "group_food_orders")
 public class GroupFoodOrder {
-
-    public enum Status {PENDING_USER_JOIN, ORDER_CANCEL, SUBMITTED_TO_RESTAURANT, KITCHEN_PREPARING, READY_FOR_DELIVERY, ON_DELIVERY, DELIVERED};
 
     @Id
     @UuidGenerator
@@ -27,12 +24,21 @@ public class GroupFoodOrder {
     @Column(name = "delivery_location")
     private String deliveryLocation;
 
+    @Column(name = "delivery_address")
+    private String deliveryAddress;
+
+    @Column(name = "delivery_latitude")
+    private String deliveryLatitude;
+
+    @Column(name = "delivery_longitude")
+    private String deliveryLongitude;
+
     @Column(name = "delivery_fee", nullable = false)
     private float deliveryFee;
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Status status = Status.PENDING_USER_JOIN;
+    private StatusEnum status = StatusEnum.PENDING_USER_JOIN;
 
     public GroupFoodOrder() {
     }
@@ -61,11 +67,11 @@ public class GroupFoodOrder {
         this.groupOrderDeliveryTime = groupOrderDeliveryTime;
     }
 
-    public Status getStatus() {
+    public StatusEnum getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(StatusEnum status) {
         this.status = status;
     }
 
@@ -75,6 +81,30 @@ public class GroupFoodOrder {
 
     public void setDeliveryLocation(String deliveryLocation) {
         this.deliveryLocation = deliveryLocation;
+    }
+
+    public String getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public void setDeliveryAddress(String deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
+    }
+
+    public String getDeliveryLatitude() {
+        return deliveryLatitude;
+    }
+
+    public void setDeliveryLatitude(String deliveryLatitude) {
+        this.deliveryLatitude = deliveryLatitude;
+    }
+
+    public String getDeliveryLongitude() {
+        return deliveryLongitude;
+    }
+
+    public void setDeliveryLongitude(String deliveryLongitude) {
+        this.deliveryLongitude = deliveryLongitude;
     }
 
     public float getDeliveryFee() {

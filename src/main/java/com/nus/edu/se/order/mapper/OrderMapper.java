@@ -25,6 +25,9 @@ public class OrderMapper {
         orderDTO.setCreatedTime(order.getCreatedTime());
         orderDTO.setOrderDetails(covertOrderDetailsToJson(orderDetailList, token));
         orderDTO.setLocation(order.getGroupFoodOrder().getDeliveryLocation());
+        orderDTO.setDeliveryAddress(order.getGroupFoodOrder().getDeliveryAddress());
+        orderDTO.setDeliveryLatitude(order.getGroupFoodOrder().getDeliveryLatitude());
+        orderDTO.setDeliveryLongitude(order.getGroupFoodOrder().getDeliveryLongitude());
         orderDTO.setDeliveryFee(order.getDeliveryFee());
         orderDTO.setPaymentStatus(order.getPaymentStatus());
         return orderDTO;

@@ -41,4 +41,16 @@ public class GroupFoodOrderResponse {
 
     private List<String> orderIdsList;
 
+    private String deliveryAddress;
+
+    private String deliveryLatitude;
+
+    private String deliveryLongitude;
+
+    private String restaurantAddress;
+
+    private String restaurantLatitude;
+
+    private String restaurantLongitude;
+
 }

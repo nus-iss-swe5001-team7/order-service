@@ -20,6 +20,9 @@ public class OrderResponse {
     private Date createdTime;
     private String orderDetails;
     private String location;
+    private String deliveryAddress;
+    private String deliveryLatitude;
+    private String deliveryLongitude;
     private float deliveryFee;
     private Order.PaymentStatus paymentStatus;
 }

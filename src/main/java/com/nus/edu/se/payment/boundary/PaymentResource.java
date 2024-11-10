@@ -8,7 +8,6 @@ import com.nus.edu.se.groupfoodorder.dao.GroupOrderRepository;
 import com.nus.edu.se.groupfoodorder.model.GroupFoodOrder;
 import com.nus.edu.se.groupfoodorder.service.GroupOrdersService;
 import com.nus.edu.se.groupfoodorder.service.JwtTokenInterface;
-import com.nus.edu.se.groupfoodorder.service.timer.TimerService;
 import com.nus.edu.se.order.dao.OrderRepository;
 import com.nus.edu.se.order.model.Order;
 import com.nus.edu.se.payment.pricing.DecoratorGenerator;
@@ -23,15 +22,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
 @RestController
 @RequestMapping("UpdatePaymentStatusAPI")
 public class PaymentResource {
-
-    @Autowired
-    private TimerService timerService;
 
     @Autowired
     private OrderRepository orderRepository;
@@ -157,7 +154,10 @@ public class PaymentResource {
                         throw new AuthenticationException("Group Order already submitted to restaurant, please join other group orders!");
                     } else {
                         order.setPaymentStatus(Order.PaymentStatus.COMPLETED);
-                        groupFoodOrder.setGroupOrderCreateTime(new Date());
+                        Date creationTime = groupFoodOrder.getGroupOrderCreateTime();
+                        if (creationTime == null) {
+                            groupFoodOrder.setGroupOrderCreateTime(new Date());
+                        }
                     }
                     break;
                 case "PROCESSING":
@@ -168,11 +168,6 @@ public class PaymentResource {
             }
 
             orderRepository.save(order);
-
-            timerService.startTimerForOrder(order.getGroupFoodOrder().getId().toString());
-
-            System.out.println("Order " + order.getGroupFoodOrder().getId().toString() + " Timer started!");
-            System.out.println("method done running");
 
             return new ResponseEntity<>("Payment status updated successfully", HttpStatus.OK);
         } else {

@@ -1,6 +1,6 @@
 package com.nus.edu.se.groupfoodorder.service.orderstatus;
 
-import com.nus.edu.se.groupfoodorder.model.GroupFoodOrder;
+import com.nus.edu.se.groupfoodorder.model.StatusEnum;
 import com.nus.edu.se.groupfoodorder.service.GroupOrdersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ public class OrderCancelCommand implements OrderStatusCommandInterface {
         if (orderId == null) {
             throw new NullPointerException("Order ID cannot be null");
         }
-        groupOrdersService.updateStatus(orderId, GroupFoodOrder.Status.ORDER_CANCEL);
+        groupOrdersService.updateStatus(orderId, StatusEnum.ORDER_CANCEL);
     }
 }
 

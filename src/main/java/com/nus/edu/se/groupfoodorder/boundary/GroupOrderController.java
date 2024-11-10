@@ -76,6 +76,10 @@ public class GroupOrderController {
             } else {
                 groupFoodOrder.setDeliveryFee(orderRequest.getDeliveryFee());
                 groupFoodOrder.setDeliveryLocation(orderRequest.getLocation());
+                //Add Delivery address information
+                groupFoodOrder.setDeliveryAddress((orderRequest.getDeliveryAddress()));
+                groupFoodOrder.setDeliveryLatitude((orderRequest.getDeliveryLatitude()));
+                groupFoodOrder.setDeliveryLongitude((orderRequest.getDeliveryLongitude()));
                 groupFoodOrder = groupOrderRepository.save(groupFoodOrder);
             }
 

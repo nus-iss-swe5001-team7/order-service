@@ -14,6 +14,9 @@ import java.util.UUID;
 public class RestaurantResponse {
     private String id;
     private String restaurantName;
+    private String restaurantAddress;
+    private String restaurantLatitude;
+    private String restaurantLongitude;
     private String cuisineType;
     private String location;
     private float rating;

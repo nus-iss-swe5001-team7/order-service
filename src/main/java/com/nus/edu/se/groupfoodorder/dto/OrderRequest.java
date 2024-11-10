@@ -15,6 +15,9 @@ public class OrderRequest{
     private String groupFoodOrderId;
     private String restaurantId;
     private String location;
+    private String deliveryAddress;
+    private String deliveryLatitude;
+    private String deliveryLongitude;
     private float deliveryFee;
     private String orderDetails;
     private String createdTime;

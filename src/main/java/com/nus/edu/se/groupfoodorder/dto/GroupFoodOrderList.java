@@ -28,6 +28,18 @@ public class GroupFoodOrderList {
 
     private String deliveryLocation;
 
+    private String deliveryAddress;
+
+    private String deliveryLatitude;
+
+    private String deliveryLongitude;
+
+    String restaurantAddress;
+
+    String restaurantLatitude;
+
+    String restaurantLongitude;
+
     public UUID getGroupFoodOrderId() {
         return groupFoodOrderId;
     }
@@ -68,6 +80,30 @@ public class GroupFoodOrderList {
         this.restaurantId = restaurantId;
     }
 
+    public String getRestaurantAddress() {
+        return restaurantAddress;
+    }
+
+    public void setRestaurantAddress(String restaurantAddress) {
+        this.restaurantAddress = restaurantAddress;
+    }
+
+    public String getRestaurantLatitude() {
+        return restaurantLatitude;
+    }
+
+    public void setRestaurantLatitude(String restaurantLatitude) {
+        this.restaurantLatitude = restaurantLatitude;
+    }
+
+    public String getRestaurantLongitude() {
+        return restaurantLongitude;
+    }
+
+    public void setRestaurantLongitude(String restaurantLongitude) {
+        this.restaurantLongitude = restaurantLongitude;
+    }
+
     public String getRestaurantName() {
         return restaurantName;
     }
@@ -106,5 +142,29 @@ public class GroupFoodOrderList {
 
     public void setDeliveryLocation(String deliveryLocation) {
         this.deliveryLocation = deliveryLocation;
+    }
+
+    public String getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public void setDeliveryAddress(String deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
+    }
+
+    public String getDeliveryLatitude() {
+        return deliveryLatitude;
+    }
+
+    public void setDeliveryLatitude(String deliveryLatitude) {
+        this.deliveryLatitude = deliveryLatitude;
+    }
+
+    public String getDeliveryLongitude() {
+        return deliveryLongitude;
+    }
+
+    public void setDeliveryLongitude(String deliveryLongitude) {
+        this.deliveryLongitude = deliveryLongitude;
     }
 }
