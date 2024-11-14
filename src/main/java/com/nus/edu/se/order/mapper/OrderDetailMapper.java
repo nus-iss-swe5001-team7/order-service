@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 @Component
 public class OrderDetailMapper {
@@ -22,6 +23,7 @@ public class OrderDetailMapper {
 //        orderDetail.setOrderItemId(order.getId());
         orderDetail.setOrder(order);
         orderDetail.setQuantity(orderDetailDTO.getQuantity());
+        orderDetail.setPreferences(orderDetailDTO.getPreferences());
         return orderDetail;
     }
 
@@ -36,6 +38,7 @@ public class OrderDetailMapper {
                     orderDetailDTO.setQuantity(orderDetail.getQuantity());
                     orderDetailDTO.setDescription(menu.getDescription());
                     orderDetailDTO.setImgUrl(menu.getMenuImageURL());
+                    orderDetailDTO.setPreferences(orderDetail.getPreferences());
                     return orderDetailDTO;
                 })
                 .collect(Collectors.toList());
@@ -49,7 +52,7 @@ public class OrderDetailMapper {
         orderDetailDto.setImgUrl(menu.getMenuImageURL());
         orderDetailDto.setDescription(menu.getDescription());
         orderDetailDto.setPrice(menu.getMenuPrice());
-
+        orderDetailDto.setPreferences(orderDetail.getPreferences());
         return orderDetailDto;
     }
 }

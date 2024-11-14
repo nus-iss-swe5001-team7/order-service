@@ -16,7 +16,7 @@ public class GroupFoodOrder {
     private UUID id;
 
     @Column(name = "group_food_order_create_time")
-    private Date groupOrderCreateTime = new Date();
+    private Date groupOrderCreateTime;
 
     @Column(name = "group_food_order_delivery_time")
     private Date groupOrderDeliveryTime;
