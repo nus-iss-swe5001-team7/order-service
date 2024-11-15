@@ -9,6 +9,7 @@ public class PayNowAdapter implements PaymentGatewayInterface {
 
     @Override
     public void processPayment() {
+        payNowPaymentInterface.checkPhoneNumForPayNow();
         System.out.println("Process: payNowPaymentInterface.checkPhoneNumForPayNow()");
     }
 }

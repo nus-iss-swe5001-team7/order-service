@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Getter
@@ -28,4 +29,6 @@ public class OrderDetailDTO {
     private String description;
 
     private UUID orderItemId;
+
+    private Map<String, String> preferences;
 }
