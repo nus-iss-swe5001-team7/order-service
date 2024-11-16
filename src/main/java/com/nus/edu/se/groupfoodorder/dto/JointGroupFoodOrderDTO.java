@@ -7,6 +7,7 @@ public class JointGroupFoodOrderDTO {
     private Integer numberOfUsers;
     private float groupOrderDeliveryFee;
     private String mainOrderId;
+    private String deliveryAddress;
 
     public String getStatus() {
         return status;
@@ -54,5 +55,13 @@ public class JointGroupFoodOrderDTO {
 
     public void setMainOrderId(String mainOrderId) {
         this.mainOrderId = mainOrderId;
+    }
+
+    public String getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public void setDeliveryAddress(String deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
     }
 }

@@ -256,6 +256,7 @@ public class GroupOrdersService {
 
         jointGroupFoodOrder.setStatus(order.getStatus().toString());
         jointGroupFoodOrder.setDeliveryLocation(order.getDeliveryLocation());
+        jointGroupFoodOrder.setDeliveryAddress(order.getDeliveryAddress());
         jointGroupFoodOrder.setGroupOrderDeliveryFee(order.getDeliveryFee());
 
         return ResponseEntity.ok(jointGroupFoodOrder);
