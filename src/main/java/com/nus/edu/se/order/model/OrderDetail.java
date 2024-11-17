@@ -1,15 +1,10 @@
 package com.nus.edu.se.order.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Getter
@@ -17,6 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(name = "order_details")
 public class OrderDetail {
 
@@ -25,12 +21,21 @@ public class OrderDetail {
     @Column(name = "order_detail_id", nullable = false)
     private UUID id;
 
-    @Column(name = "order_item_id", nullable = false)
-    private UUID orderItemId;
+//    @Column(name = "order_item_id", nullable = false)
+//    private UUID orderItemId;
+    @ManyToOne
+    @JoinColumn(name = "order_item_id", nullable = false)
+    private Order order;
 
     @Column(name = "menu_id", nullable = false)
-    private UUID menuId;
+    private String menuId;
 
     @Column(name = "order_item_quantity")
     private Integer quantity;
+
+    @ElementCollection
+    @CollectionTable(name = "order_preferences", joinColumns = @JoinColumn(name = "order_detail_id"))
+    @MapKeyColumn(name = "preference_type")
+    @Column(name = "preference_value")
+    private Map<String, String> preferences;
 }

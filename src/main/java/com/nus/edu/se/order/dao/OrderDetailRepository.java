@@ -10,5 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, UUID> {
-//    List<OrderDetail> findOrderDetailsByOrder(Order order);
+//    List<OrderDetail> findOrderDetailsByOrderItemId(UUID order);
+    List<OrderDetail> findOrderDetailsByOrder(Order order);
 }

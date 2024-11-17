@@ -1,7 +1,8 @@
 package com.nus.edu.se.order.model;
 
-import com.nus.edu.se.grouopfoodorder.model.GroupFoodOrder;
+import com.nus.edu.se.groupfoodorder.model.GroupFoodOrder;
 import jakarta.persistence.*;
+import lombok.Builder;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Date;
@@ -35,7 +36,7 @@ public class Order {
     @JoinColumn(name = "restaurant_id", nullable = false, updatable = false)
     private Restaurant restaurant;*/
     @Column(name = "restaurant_id", nullable = false, updatable = false)
-    private UUID restaurantId;
+    private String restaurantId;
 
     @Column(name = "delivery_fee", nullable = false)
     private float deliveryFee;
@@ -63,11 +64,11 @@ public class Order {
         this.userId = userId;
     }
 
-    public UUID getRestaurantId() {
+    public String getRestaurantId() {
         return restaurantId;
     }
 
-    public void setRestaurantId(UUID restaurantId) {
+    public void setRestaurantId(String restaurantId) {
         this.restaurantId = restaurantId;
     }
 

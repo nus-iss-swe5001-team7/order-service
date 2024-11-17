@@ -1,45 +1,58 @@
 package com.nus.edu.se.order.mapper;
 
-import com.nus.edu.se.exception.DataNotFoundException;
-import com.nus.edu.se.grouopfoodorder.dto.OrderDetailResponse;
-import com.nus.edu.se.menu.dao.MenuRepository;
-import com.nus.edu.se.menu.model.Menu;
+import com.nus.edu.se.order.dto.OrderDetailDTO;
+import com.nus.edu.se.menu.dto.MenuResponse;
+import com.nus.edu.se.menu.service.MenuService;
 import com.nus.edu.se.order.model.Order;
 import com.nus.edu.se.order.model.OrderDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-
 @Component
 public class OrderDetailMapper {
     @Autowired
-    private MenuRepository menuRepository;
+    private MenuService menuService;
 
-    public OrderDetail fromOrderDetailDTOToOrderDetail(OrderDetailResponse orderDetailDTO, Order order) {
+    public OrderDetail fromOrderDetailDTOToOrderDetail(OrderDetailDTO orderDetailDTO, Order order, String token) {
         OrderDetail orderDetail = new OrderDetail();
-        Menu menu = menuRepository.findById(orderDetailDTO.getMenuId()).orElseThrow(()-> new DataNotFoundException("Menu not found - fromOrderDetailDTOToOrderDetail."));
+        MenuResponse menu = menuService.findById(orderDetailDTO.getMenuId(), token);
         orderDetail.setMenuId(menu.getId());
-        orderDetail.setOrderItemId(order.getId());
+//        orderDetail.setOrderItemId(order.getId());
+        orderDetail.setOrder(order);
         orderDetail.setQuantity(orderDetailDTO.getQuantity());
+        orderDetail.setPreferences(orderDetailDTO.getPreferences());
         return orderDetail;
     }
 
-    public List<OrderDetailResponse> fromOrderDetailToOrderDetailDTO(List<OrderDetailResponse> orderDetails) {
+    public List<OrderDetailDTO> fromOrderDetailToOrderDetailDTO(List<OrderDetail> orderDetails, String token) {
         return orderDetails.stream()
                 .map(orderDetail -> {
-                    Menu menu = menuRepository.findById(orderDetail.getMenuId()).orElseThrow(()-> new DataNotFoundException("Menu not found - fromOrderDetailToOrderDetailDTO."));
-
-                    OrderDetailResponse orderDetailDTO = new OrderDetailResponse();
+                    MenuResponse menu = menuService.findById(orderDetail.getMenuId(), token);
+                    OrderDetailDTO orderDetailDTO = new OrderDetailDTO();
                     orderDetailDTO.setMenuId(orderDetail.getMenuId());
                     orderDetailDTO.setPrice(menu.getMenuPrice());
                     orderDetailDTO.setName(menu.getMenuName());
                     orderDetailDTO.setQuantity(orderDetail.getQuantity());
                     orderDetailDTO.setDescription(menu.getDescription());
                     orderDetailDTO.setImgUrl(menu.getMenuImageURL());
+                    orderDetailDTO.setPreferences(orderDetail.getPreferences());
                     return orderDetailDTO;
                 })
                 .collect(Collectors.toList());
+    }
+
+    public OrderDetailDTO fromOrderDetailToOrderDetailDTO(OrderDetail orderDetail,MenuResponse menu) {
+        OrderDetailDTO orderDetailDto = new OrderDetailDTO();
+
+        orderDetailDto.setQuantity(orderDetail.getQuantity());
+        orderDetailDto.setName(menu.getMenuName());
+        orderDetailDto.setImgUrl(menu.getMenuImageURL());
+        orderDetailDto.setDescription(menu.getDescription());
+        orderDetailDto.setPrice(menu.getMenuPrice());
+        orderDetailDto.setPreferences(orderDetail.getPreferences());
+        return orderDetailDto;
     }
 }

@@ -2,9 +2,9 @@ package com.nus.edu.se.order.mapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nus.edu.se.grouopfoodorder.dto.OrderDetailResponse;
-import com.nus.edu.se.grouopfoodorder.dto.OrderResponse;
+import com.nus.edu.se.groupfoodorder.dto.OrderResponse;
 import com.nus.edu.se.order.model.Order;
+import com.nus.edu.se.order.model.OrderDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,23 +16,26 @@ public class OrderMapper {
     @Autowired
     private OrderDetailMapper orderDetailMapper;
 
-    public OrderResponse fromOrderToOrderDTO(Order order, List<OrderDetailResponse> orderDetailList) throws JsonProcessingException {
+    public OrderResponse fromOrderToOrderDTO(Order order, List<OrderDetail> orderDetailList, String token) throws JsonProcessingException {
         OrderResponse orderDTO = new OrderResponse();
         orderDTO.setId(order.getId().toString());
         orderDTO.setGroupFoodOrderId(order.getGroupFoodOrder().getId().toString());
-        orderDTO.setRestaurantId(order.getRestaurantId().toString());
+        orderDTO.setRestaurantId(order.getRestaurantId());
         orderDTO.setUserId(order.getUserId().toString());
         orderDTO.setCreatedTime(order.getCreatedTime());
-        orderDTO.setOrderDetails(covertOrderDetailsToJson(orderDetailList));
+        orderDTO.setOrderDetails(covertOrderDetailsToJson(orderDetailList, token));
         orderDTO.setLocation(order.getGroupFoodOrder().getDeliveryLocation());
+        orderDTO.setDeliveryAddress(order.getGroupFoodOrder().getDeliveryAddress());
+        orderDTO.setDeliveryLatitude(order.getGroupFoodOrder().getDeliveryLatitude());
+        orderDTO.setDeliveryLongitude(order.getGroupFoodOrder().getDeliveryLongitude());
         orderDTO.setDeliveryFee(order.getDeliveryFee());
         orderDTO.setPaymentStatus(order.getPaymentStatus());
         return orderDTO;
     }
 
-    public String covertOrderDetailsToJson(List<OrderDetailResponse> orderDetails) throws JsonProcessingException {
+    public String covertOrderDetailsToJson(List<OrderDetail> orderDetails, String token) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(orderDetailMapper.fromOrderDetailToOrderDetailDTO(orderDetails));
+        return objectMapper.writeValueAsString(orderDetailMapper.fromOrderDetailToOrderDetailDTO(orderDetails, token));
     }
 
 }
